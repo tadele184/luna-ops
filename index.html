@@ -184,7 +184,14 @@
     mainHandler = handler;
     if (inTelegram) {
       const mb = tg.MainButton;
-      mb.setParams({ text, color: enabled ? "#e6332a" : "#c9cdd2", text_color: "#ffffff", is_active: enabled, is_visible: !!text });
+      try {
+        if (!text) { mb.hide(); return; }          // Telegram throws if text is empty
+        mb.setParams({ text, color: enabled ? "#e6332a" : "#c9cdd2", text_color: "#ffffff" });
+        enabled ? mb.enable() : mb.disable();
+        mb.show();
+      } catch (e) {
+        const b = $("fb"); b.textContent = text; b.style.display = text ? "block" : "none"; b.style.opacity = enabled ? 1 : .45;
+      }
     } else {
       const b = $("fb"); b.textContent = text; b.style.display = text ? "block" : "none"; b.style.opacity = enabled ? 1 : .45;
     }
