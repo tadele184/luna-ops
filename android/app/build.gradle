@@ -1,0 +1,44 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.luna.ops'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.luna.ops"
+        minSdk 24
+        targetSdk 34
+        // every build gets a higher number, so phones can install the new version over the old one
+        versionCode((System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger())
+        versionName "10.0"
+    }
+
+    signingConfigs {
+        release {
+            storeFile file("../luna-release.keystore")
+            storePassword "lunaops2026"
+            keyAlias "luna"
+            keyPassword "lunaops2026"
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    lint {
+        // installed directly on the team's phones (not Google Play): do not stop the build on store checks
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
