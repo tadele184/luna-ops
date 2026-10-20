@@ -837,7 +837,7 @@
 
   // ================================================================ LIVESTOCK AVAILABILITY (own and service)
   // Each line: species, number, receiving date, supplier, animal location, plate number.
-  var rLines = [], rForm = { o: "own", n: "", sp: "", q: 0, rd: ctx.t, sup: "", loc: "", truck: "" };
+  var rLines = [], rForm = { o: "own", n: "", sp: "", q: 0, rd: ctx.t, sup: "", loc: "", truck: "" }, rEdit = "";
   function openReceiving() { show("page"); kind = null; backButton(goHome); drawReceiving(); }
   function uniq(list) { var o = []; list.forEach(function (x) { if (x && !contains(o, x)) o.push(x); }); return o; }
   function drawReceiving() {
@@ -850,7 +850,11 @@
       return '<div class="lot"><div class="t">' + esc(l.sp) + " · " + fmt0(l.q) + " · " + esc(l.o === "own" ? "Own" : l.n) + '</div><div class="u">Received ' + esc(dayLabel(l.rd)) +
         " · " + esc(l.sup) + " · " + esc(l.loc) + " · plate " + esc(l.truck) +
         '</div><button class="tagbtn" style="width:auto;margin-top:6px;padding:4px 10px" data-del="' + i + '">Remove</button></div>'; }).join("") + "</div>";
-    h += '<div class="card"><div class="h">Add animals</div>' +
+    var my = X.my || [];   // [lot, owner, species, number, receiving date, supplier, location, plate]
+    if (my.length && !rEdit) h += '<div class="card"><div class="h">Your recent lines<span class="sub">correct or remove</span></div>' + my.map(function (l, i) {
+      return '<div class="lot"><div class="t">' + esc(l[0]) + " · " + esc(l[2]) + " · " + fmt0(l[3]) + " · " + esc(l[1] === "o" ? "Own" : l[1]) + '</div><div class="u">Received ' + esc(dayLabel(l[4])) +
+        " · " + esc(l[5]) + " · " + esc(l[6]) + " · plate " + esc(l[7]) + '</div><button class="tagbtn" style="width:auto;margin:6px 6px 0 0;padding:4px 12px" data-ed="' + i + '">Edit</button><button class="tagbtn" style="width:auto;margin:6px 6px 0 0;padding:4px 12px" data-rm="' + i + '">Remove</button></div>'; }).join("") + "</div>";
+    h += '<div class="card"><div class="h">' + (rEdit ? "Correct " + esc(rEdit) : "Add animals") + "</div>" +
       '<div class="bigseg"><button data-o="own" class="' + (F.o === "own" ? "on" : "") + '">Own (Luna)</button><button data-o="svc" class="' + (F.o === "svc" ? "on" : "") + '">Service</button></div>' +
       (F.o === "svc" ? '<div class="fld"><label>Customer</label><select id="rN">' + opt(ctx.c || [], F.n, "Choose the customer…") + "</select></div>" : "") +
       '<div class="fld"><label>Species</label><div class="pick" id="rSp">' + SPECIES.map(function (sp) { return '<button data-sp="' + sp + '" class="' + (F.sp === sp ? "on" : "") + '">' + sp + "</button>"; }).join("") + "</div></div>" +
@@ -861,7 +865,7 @@
       '<div class="fld"><label>Animal location</label><input id="rLoc" list="locL" maxlength="60" placeholder="e.g. Adama market, Woito" value="' + esc(F.loc) + '"><datalist id="locL">' +
         uniq(sup.map(function (x) { return x[4]; })).map(function (x) { return '<option value="' + esc(x) + '">'; }).join("") + "</datalist></div>" +
       '<div class="fld"><label>Plate number</label><input id="rTr" maxlength="20" placeholder="e.g. 3-12345 OR" autocapitalize="characters" value="' + esc(F.truck) + '"></div>' +
-      '<button class="btn ghost" id="rAdd">+ Add to list</button></div>' +
+      (rEdit ? '<button class="btn ghost" id="rCancel">Cancel the correction</button></div>' : '<button class="btn ghost" id="rAdd">+ Add to list</button></div>') +
       '<div class="card"><div class="note">Lot numbers are given automatically. Available livestock is calculated from these lines, so there is no separate count to enter.</div></div>' + backLink() + footer();
     $("pageW").innerHTML = h;
     bindBack();
@@ -881,12 +885,35 @@
       var v = this.value.trim().toLowerCase();
       sup.forEach(function (x) { if (x[0].toLowerCase() === v) { if (!$("rLoc").value) $("rLoc").value = x[4]; } });
     };
+    function rErr() {
+      return F.o === "svc" && !F.n ? "Choose the customer." : !F.sp ? "Choose the species." : !F.q ? "Enter the number of animals." :
+        !F.rd ? "Enter the receiving date." : !F.sup ? "Enter the supplier." : !F.loc ? "Enter the animal location." : !F.truck ? "Enter the plate number." : "";
+    }
+    function rLine() { return { o: F.o, n: F.o === "svc" ? F.n : "", sp: F.sp, q: F.q, rd: F.rd, sup: F.sup, loc: F.loc, truck: F.truck }; }
+    var eb = $("pageW").querySelectorAll("[data-ed]");
+    for (i = 0; i < eb.length; i++) eb[i].onclick = function () {
+      var l = my[+this.getAttribute("data-ed")]; haptic();
+      rEdit = l[0]; F.o = l[1] === "o" ? "own" : "svc"; F.n = l[1] === "o" ? "" : l[1]; F.sp = l[2]; F.q = l[3]; F.rd = l[4]; F.sup = l[5]; F.loc = l[6]; F.truck = l[7];
+      drawReceiving(); window.scrollTo(0, document.body.scrollHeight);
+    };
+    var rb = $("pageW").querySelectorAll("[data-rm]");
+    for (i = 0; i < rb.length; i++) rb[i].onclick = function () {
+      var l = my[+this.getAttribute("data-rm")];
+      send({ v: 1, k: "receiving", del: l[0] }, "Remove " + l[0] + " (" + l[2] + ", " + l[3] + ")? It is taken out of the reports and the group post.");
+    };
+    if (rEdit) {
+      $("rCancel").onclick = function () { rEdit = ""; F.q = 0; F.sp = ""; F.truck = ""; drawReceiving(); window.scrollTo(0, 0); };
+      mainButton("SAVE CORRECTION", true, function () {
+        keep(); var err = rErr(); if (err) { alertMsg(err); return; }
+        send({ v: 1, k: "receiving", edit: rEdit, e: [rLine()] }, "Save the correction to " + rEdit + "?");
+      });
+      return;
+    }
     $("rAdd").onclick = function () {
       keep();
-      var err = F.o === "svc" && !F.n ? "Choose the customer." : !F.sp ? "Choose the species." : !F.q ? "Enter the number of animals." :
-        !F.rd ? "Enter the receiving date." : !F.sup ? "Enter the supplier." : !F.loc ? "Enter the animal location." : !F.truck ? "Enter the plate number." : "";
+      var err = rErr();
       if (err) { alertMsg(err); return; }
-      haptic(); rLines.push({ o: F.o, n: F.o === "svc" ? F.n : "", sp: F.sp, q: F.q, rd: F.rd, sup: F.sup, loc: F.loc, truck: F.truck });
+      haptic(); rLines.push(rLine());
       F.q = 0; drawReceiving(); window.scrollTo(0, 0);
     };
     mainButton(rLines.length ? "SUBMIT " + rLines.length + " LINE" + (rLines.length > 1 ? "S" : "") + " TO GROUP" : "ADD A LINE FIRST", rLines.length > 0, rLines.length ? function () {
@@ -934,24 +961,30 @@
   }
 
   // ================================================================ CONDEMNATION & DAMAGE
-  var cLines = [], cDate = ctx.t, cSpLast = "";
+  var cLines = [], cDate = ctx.t, cSpLast = "", cEdit = null;
   function reasonOpts(cur) { return '<option value="">Reason…</option>' + keys(C.REASONS).map(function (g) { return '<optgroup label="' + esc(g) + '">' + C.REASONS[g].map(function (r) { return "<option" + (r === cur ? " selected" : "") + ">" + esc(r) + "</option>"; }).join("") + "</optgroup>"; }).join(""); }
   function openCondemn() { show("page"); kind = null; backButton(goHome); drawCondemn(); }
   function drawCondemn() {
     var h = '<div class="card"><div class="h">⚠️ Condemnation & damage<span class="sub">' + dayLabel(cDate) + "</span></div>" + dateSeg(cDate, "data-d");
-    h += cLines.length ? cLines.map(function (l, i) {
+    var cm = X.cm || [];   // [id, date, stage, owner, category, product, species, pcs, kg, reason, note]
+    if (cEdit) h += '<div class="muted">Correcting: ' + esc(cEdit[5]) + " · " + esc(cEdit[6]) + " of " + esc(dayLabel(cEdit[1])) + ". Change the line below and tap Save correction.</div>";
+    else h += cLines.length ? cLines.map(function (l, i) {
       return '<div class="lot"><div class="t">' + esc(l.p) + " · " + esc(l.sp) + ' <span class="chip r">' + (l.q ? fmt0(l.q) + " pcs " : "") + (l.kg ? fmt(l.kg) + " kg" : "") + '</span></div><div class="u">' +
         esc(l.st) + " · " + esc(l.c) + " · " + esc(l.o === "own" ? "Own" : l.n) + " · " + esc(l.r) + (l.note ? "<br><i>" + esc(l.note) + "</i>" : "") +
         '</div><button class="tagbtn" style="width:auto;margin-top:6px;padding:4px 10px" data-del="' + i + '">Remove</button></div>'; }).join("") : '<div class="empty">No lines yet. Add the first one below.</div>';
     h += "</div>";
-    h += '<div class="card"><div class="h">Add a line</div>' +
+    if (cm.length && !cEdit) h += '<div class="card"><div class="h">Your recent lines<span class="sub">correct or remove</span></div>' + cm.map(function (l, i) {
+      return '<div class="lot"><div class="t">' + esc(l[5]) + " · " + esc(l[6]) + ' <span class="chip r">' + (l[7] ? fmt0(l[7]) + " pcs " : "") + (l[8] ? fmt(l[8]) + " kg" : "") + '</span></div><div class="u">' +
+        esc(dayLabel(l[1])) + " · " + esc(l[2]) + " · " + esc(l[3] === "o" ? "Own" : l[3]) + " · " + esc(l[9]) + (l[10] ? "<br><i>" + esc(l[10]) + "</i>" : "") +
+        '</div><button class="tagbtn" style="width:auto;margin:6px 6px 0 0;padding:4px 12px" data-ed="' + i + '">Edit</button><button class="tagbtn" style="width:auto;margin:6px 6px 0 0;padding:4px 12px" data-rm="' + i + '">Remove</button></div>'; }).join("") + "</div>";
+    h += '<div class="card"><div class="h">' + (cEdit ? "Corrected line" : "Add a line") + "</div>" +
       '<div class="two"><div class="fld"><label>Stage</label><select id="cSt">' + opt(C.STAGES, "Post-mortem") + '</select></div><div class="fld"><label>Owner</label><select id="cOw">' + ownerOpts("") + "</select></div></div>" +
       '<div class="two"><div class="fld"><label>Species</label><select id="cSp">' + opt(SPECIES, cSpLast, "Species…") + '</select></div><div class="fld"><label>Category</label><select id="cCat">' + opt(C.CATEGORIES, "Offal & by-products") + "</select></div></div>" +
       '<div class="fld"><label>Product (approved item list)</label><select id="cPr"></select></div>' +
       '<div class="two"><div class="fld"><label>Pcs</label><input id="cQ" inputmode="numeric" placeholder="0"></div><div class="fld"><label>Kg</label><input id="cKg" inputmode="decimal" placeholder="0"></div></div>' +
       '<div class="fld"><label>Reason</label><select id="cR">' + reasonOpts("") + "</select></div>" +
       '<div class="fld"><label>Note (required for Other)</label><input id="cN" maxlength="120" placeholder="Short note"></div>' +
-      '<button class="btn ghost" id="cAdd">+ Add line</button></div>';
+      (cEdit ? '<button class="btn ghost" id="cCancel">Cancel the correction</button></div>' : '<button class="btn ghost" id="cAdd">+ Add line</button></div>');
     h += '<div class="card"><div class="note">Stages <b>Chiller</b>, <b>Storage</b> and <b>Dispatch / Transport</b> reduce carcass stock. Ante-mortem and post-mortem losses are not in stock yet.</div></div>';
     $("pageW").innerHTML = h + backLink() + footer();
     bindBack();
@@ -967,12 +1000,35 @@
     }
     $("cCat").onchange = prods; $("cSp").onchange = function () { cSpLast = this.value; prods(); }; prods();
     onlyDigits($("cQ")); onlyDec($("cKg"));
-    $("cAdd").onclick = function () {
+    function cLine() {
       var ow = $("cOw").value;
-      var l = { st: $("cSt").value, o: ow === "own" ? "own" : "svc", n: ow === "own" ? "" : ow, c: $("cCat").value, p: $("cPr").value, sp: $("cSp").value,
+      return { st: $("cSt").value, o: ow === "own" ? "own" : "svc", n: ow === "own" ? "" : ow, c: $("cCat").value, p: $("cPr").value, sp: $("cSp").value,
         q: +$("cQ").value || 0, kg: parseFloat($("cKg").value) || 0, r: $("cR").value, note: $("cN").value.trim() };
-      var err = !l.sp ? "Choose the species." : !l.p ? "Choose the product." : !l.r ? "Choose the reason." : (!l.q && !l.kg) ? "Enter pcs and/or kg." : (l.r.indexOf("Other") === 0 && !l.note) ? "Add a note for Other." :
+    }
+    function cErr(l) {
+      return !l.sp ? "Choose the species." : !l.p ? "Choose the product." : !l.r ? "Choose the reason." : (!l.q && !l.kg) ? "Enter pcs and/or kg." : (l.r.indexOf("Other") === 0 && !l.note) ? "Add a note for Other." :
         (l.c === "Live animal" && l.st !== "Ante-mortem") ? "Live animals are rejected at ante-mortem." : "";
+    }
+    var eb = $("pageW").querySelectorAll("[data-ed]");
+    for (i = 0; i < eb.length; i++) eb[i].onclick = function () { haptic(); cEdit = cm[+this.getAttribute("data-ed")]; cDate = cEdit[1]; drawCondemn(); window.scrollTo(0, 0); };
+    var rb = $("pageW").querySelectorAll("[data-rm]");
+    for (i = 0; i < rb.length; i++) rb[i].onclick = function () {
+      var l = cm[+this.getAttribute("data-rm")];
+      send({ v: 1, k: "condemn", del: l[0] }, "Remove " + l[5] + " (" + l[6] + ") of " + dayLabel(l[1]) + "? It is taken out of the reports and the group post.");
+    };
+    if (cEdit) {
+      var E = cEdit;
+      $("cOw").value = E[3] === "o" ? "own" : E[3]; $("cSp").value = E[6]; $("cCat").value = E[4]; prods();
+      $("cPr").value = E[5]; $("cSt").value = E[2]; $("cQ").value = E[7] || ""; $("cKg").value = E[8] || ""; $("cR").value = E[9]; $("cN").value = E[10] || "";
+      $("cCancel").onclick = function () { cEdit = null; cDate = ctx.t; drawCondemn(); window.scrollTo(0, 0); };
+      mainButton("SAVE CORRECTION", true, function () {
+        var l = cLine(), err = cErr(l); if (err) { alertMsg(err); return; }
+        send({ v: 1, k: "condemn", edit: E[0], d: cDate, e: [l] }, "Save the correction for " + dayLabel(cDate) + "?");
+      });
+      return;
+    }
+    $("cAdd").onclick = function () {
+      var l = cLine(), err = cErr(l);
       if (err) { alertMsg(err); return; }
       haptic(); cLines.push(l); drawCondemn(); window.scrollTo(0, 0);
     };
