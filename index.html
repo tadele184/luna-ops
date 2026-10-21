@@ -191,26 +191,24 @@
   .erow .u { font-size: 12.5px; color: var(--ink2); margin-top: 2px; }
   .sect { font-size: 12px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase; color: var(--ink2); margin: 16px 4px 8px; }
   .fld input[type=date] { -webkit-appearance: none; min-height: 42px; }
+  .acts { margin-top: 6px; }
+  .acts button { padding: 5px 12px; border-radius: 10px; font-size: 12.5px; font-weight: 800; margin-right: 6px; }
+  .acts .ed { background: var(--blue-50); color: var(--blue); }
+  .acts .rm { background: var(--red-50); color: var(--red); }
+  .lot.editing { background: var(--blue-50); border-radius: 12px; padding: 10px; }
   .chk { display: flex; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
-  .chk:first-child { border-top: 0; }
-  .chk .l { flex: 1; font-weight: 700; font-size: 14px; padding-right: 6px; }
-  .chk button { padding: 9px 11px; border-radius: 10px; background: var(--bg); color: var(--ink2); font-weight: 800; font-size: 13px; margin-left: 6px; white-space: nowrap; }
-  .chk button.ok { background: var(--green); color: #fff; } .chk button.bad { background: var(--amber); color: #fff; }
-  .chknote { padding: 0 0 10px; } .chknote input { width: 100%; border: 1px solid var(--amber); border-radius: 10px; padding: 10px; font-size: 15px; }
-  .pick { display: flex; flex-wrap: wrap; margin: 0 -4px; }
-  .pick button { margin: 4px; padding: 11px 14px; border-radius: 12px; background: var(--bg); font-weight: 800; font-size: 15px; color: var(--ink2); }
-  .pick button.on { background: var(--red); color: #fff; }
-  .bigseg { display: flex; background: var(--bg); border-radius: 14px; padding: 4px; margin-bottom: 12px; }
-  .bigseg button { flex: 1; padding: 12px 4px; border-radius: 11px; font-weight: 800; font-size: 15px; color: var(--ink2); }
-  .bigseg button.on { background: var(--red); color: #fff; }
-  .sumrow { display: flex; justify-content: space-between; padding: 7px 0; border-top: 1px solid var(--line); font-size: 14px; }
-  .sumrow:first-child { border-top: 0; }
-  details.more summary { color: var(--red); font-weight: 800; padding: 6px 0; }
-  .net { padding: 7px 16px; font-size: 13px; font-weight: 800; display: flex; align-items: center; }
-  .net.ok { background: var(--green-50); color: var(--green); } .net.bad { background: var(--red-50); color: var(--red); } .net.wait { background: var(--amber-50); color: var(--amber); }
-  .net button { margin-left: auto; background: #fff; border-radius: 8px; padding: 4px 10px; font-weight: 800; color: inherit; }
-  .hide { display: none; } body.native .net.hide { display: flex; }
-  .rep { font-size: 14px; line-height: 1.5; overflow-wrap: anywhere; } .rep pre { background: var(--bg); padding: 8px 10px; border-radius: 10px; font-size: 12px; overflow-x: auto; }
+  .chk:first-of-type { border-top: 0; }
+  .chk .l { flex: 1; font-weight: 700; font-size: 14px; padding-right: 8px; }
+  .tog { display: flex; background: var(--bg); border-radius: 10px; padding: 3px; flex: none; }
+  .tog button { padding: 7px 12px; border-radius: 8px; font-size: 13px; font-weight: 800; color: var(--ink3); }
+  .tog button.ok { background: var(--green); color: #fff; } .tog button.bad { background: var(--amber); color: #fff; }
+  .chknote { margin: 0 0 10px; }
+  .chknote input { width: 100%; border: 1px solid var(--amber); background: var(--amber-50); border-radius: 10px; padding: 9px; font-size: 14px; }
+  .unit { font-size: 11px; font-weight: 800; color: var(--blue); background: var(--blue-50); padding: 2px 8px; border-radius: 20px; margin-left: 6px; }
+  .editbar { margin: 12px; padding: 10px 12px; border-radius: 12px; background: var(--blue-50); color: var(--blue); font-weight: 800; font-size: 13.5px; display: flex; align-items: center; }
+  .editbar button { margin-left: auto; background: #fff; color: var(--blue); padding: 6px 12px; border-radius: 10px; font-weight: 800; }
+  details.more { border: 0; padding: 4px 0 0; }
+  details.more summary { color: var(--blue); font-size: 13.5px; }
 </style>
 </head>
 <body class="noav">
@@ -221,7 +219,6 @@
   <div class="brand"><img alt="LUNA" src="data:image/png;base64,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"></div>
 </div>
 
-<div class="net hide" id="net"></div>
 <section class="screen" id="home"><div class="wrap" id="homeW"></div></section>
 <section class="screen" id="page"><div class="wrap" id="pageW"></div></section>
 <section class="screen" id="entry">
@@ -239,26 +236,26 @@
 <script>
 (function () {
   "use strict";
-  var C = {"CATEGORIES": ["Carcass", "Offal & by-products", "Hides & skins", "Cuts & aged", "Live animal"], "PRODUCTS": {"Carcass": [["Whole carcass", ["HL Sheep", "BH Sheep", "Goat", "Bull", "Calf"]], ["Half carcass", ["HL Sheep", "BH Sheep", "Goat", "Bull", "Calf"]], ["Quarter", ["HL Sheep", "BH Sheep", "Goat", "Bull", "Calf"]], ["Carcass part / trim", ["HL Sheep", "BH Sheep", "Goat", "Bull", "Calf"]]], "Offal & by-products": [["Shoat Bile", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Brain", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Kidney", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Heart", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Tongue", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Liver", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Pizzle", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Testicle", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat for Dog", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Trim Meat", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Tallow", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Jaw Meat", ["HL Sheep", "BH Sheep", "Goat"]], ["Minced Tripe", ["HL Sheep", "BH Sheep", "Goat"]], ["Cleaned Shoat Tripe", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Tripe", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Lung", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Omasum", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Large Intestine", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Small Intestine", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Head", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Head (kg)", ["HL Sheep", "BH Sheep", "Goat"]], ["Beef Bile", ["Bull"]], ["Beef Kidney", ["Bull"]], ["Beef Heart", ["Bull"]], ["Beef Tongue", ["Bull"]], ["Beef Liver", ["Bull"]], ["Beef Trim Meat", ["Bull"]], ["Beef Pizzle", ["Bull"]], ["Beef Tallow Fat", ["Bull"]], ["Cattle Tripe", ["Bull"]], ["Beef for Dog", ["Bull"]], ["Beef Head", ["Bull"]], ["Beef Horn", ["Bull"]], ["Beef Hooves", ["Bull"]], ["Beef Lung", ["Bull"]], ["Beef Omasum", ["Bull"]], ["Beef Large Intestine", ["Bull"]], ["Beef Small Intestine", ["Bull"]], ["Beef Pancreas", ["Bull"]], ["Veal Bile", ["Calf"]], ["Veal Kidney", ["Calf"]], ["Veal Heart", ["Calf"]], ["Veal Tongue", ["Calf"]], ["Veal Liver", ["Calf"]], ["Veal Trim Meat", ["Calf"]], ["Veal Pizzle", ["Calf"]], ["Veal for Dog", ["Calf"]], ["Veal Tallow Fat", ["Calf"]], ["Veal Omasum", ["Calf"]], ["Veal Lung", ["Calf"]], ["Veal Hooves", ["Calf"]], ["Veal Pancreas", ["Calf"]], ["Veal Large Intestine", ["Calf"]], ["Veal Small Intestine", ["Calf"]], ["Veal Head", ["Calf"]]], "Hides & skins": [["Goat Hide", ["Goat"]], ["BH Sheep Hide", ["BH Sheep"]], ["HL Sheep Hide", ["HL Sheep"]], ["Beef Hide", ["Bull"]], ["Veal Hide", ["Calf"]], ["Beef Hide (kg)", ["Bull"]], ["Veal Hide (kg)", ["Calf"]]], "Cuts & aged": [["Aged Beef", ["Bull"]], ["Aged Beef Special", ["Bull"]], ["Fresh Rib Eye", ["Bull"]], ["Special Beef Osso Buco", ["Bull"]], ["Special Forequarter", ["Bull"]], ["Special Hindquarter", ["Bull"]], ["Special Ribeye", ["Bull"]], ["Beef Shrinkage Special", ["Bull"]], ["Beef Flank", ["Bull"]], ["Kidney Fat", ["Bull"]], ["Beef Tail", ["Bull"]], ["Fresh Ribs for Slow Cooking", ["Bull"]], ["Beef Trim Meat from Wet Ageing", ["Bull"]], ["Beef Shank (Nebro)", ["Bull"]], ["Beef Brisket", ["Bull"]]], "Live animal": [["Live animal", ["HL Sheep", "BH Sheep", "Goat", "Bull", "Calf"]]]}, "REASONS": {"Disease (post-mortem)": ["Abscess", "Tuberculosis lesions", "Cysticercosis", "Hydatid cyst", "Fasciolosis (liver fluke)", "Pneumonia / pleurisy", "Jaundice", "Emaciation", "Septicaemia / fever", "Tumour"], "Contamination": ["Faecal / ingesta contamination", "Hair / foreign matter"], "Handling damage": ["Bruising / trauma", "Physical damage", "Dropped on floor"], "Cold chain and quality": ["Temperature abuse", "Spoilage / off-odour", "Discolouration", "Shelf life expired"], "Ante-mortem": ["Sick / fever", "Lame / injured", "Dead on arrival"], "Other": ["Other (see note)"]}, "CUTS": ["Whole carcass", "Hind quarter", "Fore quarter", "Striploin", "Ribeye", "Tenderloin", "Rump", "T-bone", "Other cut"], "METHODS": ["Dry", "Wet (vacuum)"], "AGED_DEST": ["Fresh Kitchen", "Fresh Corner", "Export", "Other"], "STAGES": ["Ante-mortem", "Post-mortem", "Chiller", "Storage", "Dispatch / Transport"], "FORM": "OF-LESH-021", "AGED_MAX": 30, "AGED_WARN": 25, "STOCK_MAX": 2, "FOOTER": ["© 2026 Tadele B. All Rights Reserved.", "Developed by Tadele B.", "For support, inquiries, or further information, please contact: tadelebek@gmail.com."]};
+  var C = {"CATEGORIES": ["Carcass", "Offal & by-products", "Hides & skins", "Cuts & aged", "Live animal"], "PRODUCTS": {"Carcass": [["Whole carcass", ["HL Sheep", "BH Sheep", "Goat", "Bull", "Calf"]], ["Half carcass", ["HL Sheep", "BH Sheep", "Goat", "Bull", "Calf"]], ["Quarter", ["HL Sheep", "BH Sheep", "Goat", "Bull", "Calf"]], ["Carcass part / trim", ["HL Sheep", "BH Sheep", "Goat", "Bull", "Calf"]]], "Offal & by-products": [["Shoat Bile", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Brain", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Kidney", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Heart", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Tongue", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Liver", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Pizzle", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Testicle", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat for Dog", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Trim Meat", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Tallow", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Jaw Meat", ["HL Sheep", "BH Sheep", "Goat"]], ["Minced Tripe", ["HL Sheep", "BH Sheep", "Goat"]], ["Cleaned Shoat Tripe", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Tripe", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Lung", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Omasum", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Large Intestine", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Small Intestine", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Head", ["HL Sheep", "BH Sheep", "Goat"]], ["Shoat Head (kg)", ["HL Sheep", "BH Sheep", "Goat"]], ["Beef Bile", ["Bull"]], ["Beef Kidney", ["Bull"]], ["Beef Heart", ["Bull"]], ["Beef Tongue", ["Bull"]], ["Beef Liver", ["Bull"]], ["Beef Trim Meat", ["Bull"]], ["Beef Pizzle", ["Bull"]], ["Beef Tallow Fat", ["Bull"]], ["Cattle Tripe", ["Bull"]], ["Beef for Dog", ["Bull"]], ["Beef Head", ["Bull"]], ["Beef Horn", ["Bull"]], ["Beef Hooves", ["Bull"]], ["Beef Lung", ["Bull"]], ["Beef Omasum", ["Bull"]], ["Beef Large Intestine", ["Bull"]], ["Beef Small Intestine", ["Bull"]], ["Beef Pancreas", ["Bull"]], ["Veal Bile", ["Calf"]], ["Veal Kidney", ["Calf"]], ["Veal Heart", ["Calf"]], ["Veal Tongue", ["Calf"]], ["Veal Liver", ["Calf"]], ["Veal Trim Meat", ["Calf"]], ["Veal Pizzle", ["Calf"]], ["Veal for Dog", ["Calf"]], ["Veal Tallow Fat", ["Calf"]], ["Veal Omasum", ["Calf"]], ["Veal Lung", ["Calf"]], ["Veal Hooves", ["Calf"]], ["Veal Pancreas", ["Calf"]], ["Veal Large Intestine", ["Calf"]], ["Veal Small Intestine", ["Calf"]], ["Veal Head", ["Calf"]]], "Hides & skins": [["Goat Hide", ["Goat"]], ["BH Sheep Hide", ["BH Sheep"]], ["HL Sheep Hide", ["HL Sheep"]], ["Beef Hide", ["Bull"]], ["Veal Hide", ["Calf"]], ["Beef Hide (kg)", ["Bull"]], ["Veal Hide (kg)", ["Calf"]]], "Cuts & aged": [["Aged Beef", ["Bull"]], ["Aged Beef Special", ["Bull"]], ["Fresh Rib Eye", ["Bull"]], ["Special Beef Osso Buco", ["Bull"]], ["Special Forequarter", ["Bull"]], ["Special Hindquarter", ["Bull"]], ["Special Ribeye", ["Bull"]], ["Beef Shrinkage Special", ["Bull"]], ["Beef Flank", ["Bull"]], ["Kidney Fat", ["Bull"]], ["Beef Tail", ["Bull"]], ["Fresh Ribs for Slow Cooking", ["Bull"]], ["Beef Trim Meat from Wet Ageing", ["Bull"]], ["Beef Shank (Nebro)", ["Bull"]], ["Beef Brisket", ["Bull"]]], "Live animal": [["Live animal", ["HL Sheep", "BH Sheep", "Goat", "Bull", "Calf"]]]}, "REASONS": {"Disease (post-mortem)": ["Abscess", "Tuberculosis lesions", "Cysticercosis", "Hydatid cyst", "Fasciolosis (liver fluke)", "Pneumonia / pleurisy", "Jaundice", "Emaciation", "Septicaemia / fever", "Tumour"], "Contamination": ["Faecal / ingesta contamination", "Hair / foreign matter"], "Handling damage": ["Bruising / trauma", "Physical damage", "Dropped on floor"], "Cold chain and quality": ["Temperature abuse", "Spoilage / off-odour", "Discolouration", "Shelf life expired"], "Ante-mortem": ["Sick / fever", "Lame / injured", "Dead on arrival"], "Other": ["Other (see note)"]}, "CUTS": ["Whole carcass", "Hind quarter", "Fore quarter", "Striploin", "Ribeye", "Tenderloin", "Rump", "T-bone", "Other cut"], "METHODS": ["Dry", "Wet (vacuum)"], "AGED_DEST": ["Fresh Kitchen", "Fresh Corner", "Export", "Other"], "STAGES": ["Ante-mortem", "Post-mortem", "Chiller", "Storage", "Dispatch / Transport"], "FORM": "OF-LESH-021", "AGED_MAX": 30, "AGED_WARN": 25, "STOCK_MAX": 2, "FOOTER": ["© 2026 Tadele B. All Rights Reserved.", "Developed by Tadele B.", "For support, inquiries, or further information, please contact: tadelebek@gmail.com."], "ITEMS": [[1, "Goat Carcass", "Carcass", "pcs+kg"], [2, "Goat Carcass Special", "Carcass", "pcs+kg"], [3, "Goat Carcass Special EK", "Carcass", "pcs+kg"], [4, "FC Goat for Kurt", "Carcass", "pcs+kg"], [5, "Mutton Carcass", "Carcass", "pcs+kg"], [6, "BH Mutton Carcass", "Carcass", "pcs+kg"], [7, "Beef Carcass", "Carcass", "pcs+kg"], [8, "Beef Carcass DF", "Carcass", "pcs+kg"], [9, "Special Beef Carcass", "Carcass", "pcs+kg"], [10, "Beef Carcass EK", "Carcass", "pcs+kg"], [11, "FC Beef Carcass (Kurt)", "Carcass", "pcs+kg"], [12, "Special Beef Carcass FC", "Carcass", "pcs+kg"], [13, "Beef Carcass with Bone FC", "Carcass", "pcs+kg"], [14, "Beef Carcass without Bone", "Carcass", "pcs+kg"], [15, "Aged Beef", "Beef Cuts & Aged Beef", "kg"], [16, "Aged Beef Special", "Beef Cuts & Aged Beef", "kg"], [17, "Fresh Rib Eye", "Beef Cuts & Aged Beef", "kg"], [18, "Veal Carcass", "Carcass", "pcs+kg"], [19, "Veal Carcass DF", "Carcass", "pcs+kg"], [20, "Shoat Bile", "Shoat By-products", "pcs"], [21, "Shoat Brain", "Shoat By-products", "pcs"], [22, "Shoat Kidney", "Shoat By-products", "pcs"], [23, "Shoat Heart", "Shoat By-products", "pcs"], [24, "Shoat Tongue", "Shoat By-products", "pcs"], [25, "Shoat Liver", "Shoat By-products", "pcs"], [26, "Shoat Pizzle", "Shoat By-products", "pcs"], [27, "Shoat Testicle", "Shoat By-products", "pcs"], [28, "Shoat for Dog", "Shoat By-products", "kg"], [29, "Shoat Trim Meat", "Shoat By-products", "kg"], [30, "Shoat Tallow", "Shoat By-products", "kg"], [31, "Shoat Jaw Meat", "Shoat By-products", "kg"], [32, "Minced Tripe", "Shoat By-products", "kg"], [33, "Cleaned Shoat Tripe", "Shoat By-products", "pcs"], [34, "Shoat Tripe", "Shoat By-products", "pcs"], [35, "Shoat Lung", "Shoat By-products", "pcs"], [36, "Shoat Omasum", "Shoat By-products", "pcs"], [37, "Shoat Large Intestine", "Shoat By-products", "pcs"], [38, "Shoat Small Intestine", "Shoat By-products", "pcs"], [39, "Shoat Head", "Shoat By-products", "pcs"], [40, "Goat Hide", "Hides & Skins", "pcs"], [41, "Shoat Head (kg)", "Shoat By-products", "kg"], [42, "BH Sheep Hide", "Hides & Skins", "pcs"], [43, "HL Sheep Hide", "Hides & Skins", "pcs"], [44, "Beef Bile", "Beef By-products", "pcs"], [45, "Beef Kidney", "Beef By-products", "pcs"], [46, "Beef Heart", "Beef By-products", "pcs"], [47, "Beef Tongue", "Beef By-products", "pcs"], [48, "Beef Liver", "Beef By-products", "pcs"], [49, "Beef Trim Meat", "Beef By-products", "kg"], [50, "Beef Pizzle", "Beef By-products", "pcs"], [51, "Beef Tallow Fat", "Beef By-products", "kg"], [52, "Cattle Tripe", "Beef By-products", "pcs"], [53, "Beef for Dog", "Beef By-products", "kg"], [54, "Beef Hide", "Hides & Skins", "pcs"], [55, "Beef Head", "Beef By-products", "pcs"], [56, "Beef Horn", "Beef By-products", "pcs"], [57, "Beef Hooves", "Beef By-products", "pcs"], [58, "Beef Lung", "Beef By-products", "pcs"], [59, "Beef Omasum", "Beef By-products", "pcs"], [60, "Beef Large Intestine", "Beef By-products", "pcs"], [61, "Beef Small Intestine", "Beef By-products", "pcs"], [62, "Beef Pancreas", "Beef By-products", "pcs"], [63, "Veal Bile", "Veal By-products", "pcs"], [64, "Veal Kidney", "Veal By-products", "pcs"], [65, "Veal Heart", "Veal By-products", "pcs"], [66, "Veal Tongue", "Veal By-products", "pcs"], [67, "Veal Liver", "Veal By-products", "pcs"], [68, "Veal Trim Meat", "Veal By-products", "kg"], [69, "Veal Pizzle", "Veal By-products", "pcs"], [70, "Veal for Dog", "Veal By-products", "kg"], [71, "Veal Tallow Fat", "Veal By-products", "kg"], [72, "Veal Omasum", "Veal By-products", "pcs"], [73, "Veal Lung", "Veal By-products", "pcs"], [74, "Veal Hooves", "Veal By-products", "pcs"], [75, "Veal Pancreas", "Veal By-products", "pcs"], [76, "Veal Hide", "Hides & Skins", "pcs"], [77, "Veal Large Intestine", "Veal By-products", "pcs"], [78, "Veal Small Intestine", "Veal By-products", "pcs"], [79, "Veal Head", "Veal By-products", "pcs"], [80, "Special Beef Osso Buco", "Beef Cuts & Aged Beef", "kg"], [81, "Special Forequarter", "Beef Cuts & Aged Beef", "kg"], [82, "Special Hindquarter", "Beef Cuts & Aged Beef", "kg"], [83, "Special Ribeye", "Beef Cuts & Aged Beef", "kg"], [84, "Beef Shrinkage Special", "Beef Cuts & Aged Beef", "kg"], [85, "Beef Flank", "Beef Cuts & Aged Beef", "kg"], [86, "Kidney Fat", "Beef Cuts & Aged Beef", "kg"], [87, "Beef Tail", "Beef Cuts & Aged Beef", "kg"], [88, "Fresh Ribs for Slow Cooking", "Beef Cuts & Aged Beef", "kg"], [89, "Beef Trim Meat from Wet Ageing", "Beef Cuts & Aged Beef", "kg"], [90, "Beef Shank (Nebro)", "Beef Cuts & Aged Beef", "kg"], [91, "Beef Brisket", "Beef Cuts & Aged Beef", "kg"], [92, "Beef Hide (kg)", "Hides & Skins", "kg"], [93, "Veal Hide (kg)", "Hides & Skins", "kg"]], "SCOLS": [["count", "Physical count"], ["open", "Opening balance"], ["own", "Own production"], ["svc", "Slaughter service"], ["tin", "Transfer in"], ["exp", "Sales export"], ["fc", "Sales FC"], ["fck", "Sales FC Kitchen"], ["modjo", "Sales Modjo"], ["debone", "Deboning"], ["tout", "Transfer out"], ["damage", "Damage"]], "SYS": ["own", "exp", "fc", "fck", "modjo", "tout", "damage"], "MAIN": ["BH Mutton Carcass", "Beef Carcass", "Goat Carcass", "Mutton Carcass", "Veal Carcass"], "RECEIPTS": ["own", "svc", "tin"], "SETS": ["open", "count"]};
   var SPECIES = ["HL Sheep", "BH Sheep", "Goat", "Bull", "Calf"];
   var RANGE = { "HL Sheep": [7, 28], "BH Sheep": [7, 28], "Goat": [5, 22], "Bull": [90, 420], "Calf": [25, 160] };
   var DEF_AVG = { "HL Sheep": 15, "BH Sheep": 13, "Goat": 11, "Bull": 210, "Calf": 70 };
   var KINDS = {
-    receiving:  { name: "Livestock Availability", icon: "🐑", sub: "Own and service: species, number, date, supplier, location, plate" },
+    receiving:  { name: "Livestock Receiving",   icon: "🚛", sub: "Each truck: supplier, address, plate, species, heads, origin" },
     livestock:  { name: "Available Livestock",   short: "Livestock",  icon: "🐑", unit: "heads", own: [null], sub: "Heads ready for slaughter" },
     antemortem: { name: "Antemortem",            short: "Antemortem", icon: "🩺", unit: "heads", own: [null], sub: "Heads that passed inspection" },
-    inspect:    { name: "Inspection & Hygiene",  icon: "🔬", sub: "Ante/post-mortem, disease & treatment by truck, hygiene" },
+    inspect:    { name: "Inspection & Hygiene",  icon: "🔬", sub: "By production date: the day's batches are linked automatically" },
     order:      { name: "Production Order",      short: "Order",      icon: "📝", unit: "pcskg", own: ["Fresh Corner", "Kitchen", "Export", "Local"], tag: "ESTIMATE", sub: "Estimated pcs and kg" },
     production: { name: "Production",            short: "Production", icon: "🏭", unit: "pcskg", own: ["Fresh Corner", "Kitchen", "Export", "Local"], tag: "ACTUAL", sub: "Actual pcs and kg, processing and chilling" },
     dispatch:   { name: "Dispatch",              short: "Dispatch",   icon: "🚚", unit: "pcskg", own: ["Export", "Fresh Corner", "Kitchen"], tag: "ACTUAL", sub: "Actual pcs and kg, packing and delivery" },
     condemn:    { name: "Condemnation & Damage", icon: "⚠️", sub: "Reason and quantity for every item" },
     aged:       { name: "Aged Beef",             icon: "🥩", sub: "Into ageing and releases" },
-    stocksheet: { name: "Stock Input Sheet",     icon: "📦", sub: "Offal, by-products and physical count (Excel)" }
+    stocksheet: { name: "Stock",                 icon: "📦", sub: "Pick the item, enter pcs or kg: counts and movements" }
   };
   var ORDER = ["livestock", "antemortem", "order", "production", "dispatch"];
-  var ENTRY = ["receiving", "antemortem", "inspect", "order", "production", "dispatch", "aged", "stocksheet", "condemn"];
+  var ENTRY = ["receiving", "livestock", "antemortem", "inspect", "order", "production", "dispatch", "aged", "stocksheet", "condemn"];
   var PEOPLE = {
-    getamesaygirma: { name: "Getamesay", role: "Livestock Availability", img: "data:image/jpeg;base64,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" },
+    getamesaygirma: { name: "Getamesay", role: "Livestock Receiving & Supply", img: "data:image/jpeg;base64,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" },
     tekesteab: { name: "Dr. Tekeste", role: "Inspection & Hygiene", img: "data:image/jpeg;base64,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" },
     sinidu_demisse: { name: "Sinidu", role: "Production, Dispatch & Stock", img: "data:image/jpeg;base64,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" },
     ccbagroup: { name: "Tadele", role: "Super Admin", img: "LOGO" },
@@ -275,23 +272,17 @@
     ["pack_mat", "Packing material used", "t", 80, "e.g. stockinette, PE liner"], ["pack_lot", "Packing material code / lot", "t", 40, ""],
     ["pack_recv", "Material date received", "t", 10, "dd-mm-yyyy"], ["pack_sup", "Material supplier", "t", 80, ""], ["pack_sup_addr", "Supplier address & telephone", "t", 120, ""],
     ["driver", "Driver name", "t", 60, ""], ["plate", "Truck plate No.", "t", 20, ""], ["temp", "Truck temperature (°C)", "n", 6, "e.g. 2.5"]];
-  var F_INSP = [["am_st", "Ante-mortem", "st"], ["am", "Ante-mortem results", "ta", 300, "Findings, animals held or rejected"],
-    ["pm_st", "Post-mortem", "st"], ["pm", "Post-mortem results", "ta", 300, "Findings, condemnations"],
+  var F_INSP = [["am_st", "Ante-mortem inspection", "st"], ["am", "Ante-mortem results", "ta", 300, "Findings, animals held or rejected"],
+    ["pm_st", "Post-mortem inspection", "st"], ["pm", "Post-mortem results", "ta", 300, "Findings, condemnations"],
     ["disease", "Pathogens / disease observed", "t", 300, ""], ["treatment", "Treatment done", "t", 300, ""],
-    ["staff_st", "Staff health & hygiene", "st"], ["staff", "Employee note", "t", 200, ""], ["hall_st", "Slaughtering hall", "st"], ["hall", "Hall note", "t", 200, ""],
+    ["staff_st", "Employee health & hygiene", "st"], ["staff", "Employee note", "t", 200, ""], ["hall_st", "Slaughtering hall", "st"], ["hall", "Hall note", "t", 200, ""],
     ["lairage_st", "Reception & lairage", "st"], ["lairage", "Lairage note", "t", 200, ""],
-    ["truck_st", "Delivery truck", "st"], ["truck", "Truck note", "t", 200, ""], ["remark", "Final remark", "ta", 300, ""]];
+    ["truck_st", "Delivery truck hygiene", "st"], ["truck", "Truck note", "t", 200, ""], ["remark", "Final remark", "ta", 300, ""]];
   var INSP_REQ = ["am_st", "pm_st", "staff_st", "hall_st", "lairage_st", "truck_st"];
   var NO_CARRY = { pack_dt: 1, deliv_dt: 1, temp: 1 };
 
   var tg = window.Telegram && window.Telegram.WebApp;
   var inTelegram = !!(tg && tg.initData !== undefined && tg.platform && tg.platform !== "unknown");
-  // Android app (LUNA Ops): same screens, data from the Mac server, entries kept on the phone until sent.
-  var NATIVE = !inTelegram && (!!window.LunaNative || /[?&]native=1/.test(location.search));
-  var APPV = "10.0";
-  function nget(k) { try { var v = window.LunaNative ? window.LunaNative.get(k) : localStorage.getItem("luna_" + k); return v ? JSON.parse(v) : null; } catch (e) { return null; } }
-  function nset(k, v) { var x = JSON.stringify(v); try { if (window.LunaNative) window.LunaNative.set(k, x); else localStorage.setItem("luna_" + k, x); } catch (e) {} }
-  var CFG = NATIVE ? (nget("cfg") || {}) : {};
   function $(id) { return document.getElementById(id); }
   function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
   function fmt(n, d) { if (n == null || n === "") return "-"; var f = Math.pow(10, d == null ? 1 : d); return (Math.round(n * f) / f).toLocaleString("en-US"); }
@@ -398,9 +389,10 @@
   function packed(h) { try { return h ? JSON.parse(utf8(inflateRaw(b64bytes(h)))) : null; } catch (e) { return null; } }
   var hp = {};
   location.hash.slice(1).split("&").forEach(function (kv) { var i = kv.indexOf("="); if (i > 0) hp[kv.slice(0, i)] = kv.slice(i + 1); });
-  var CACHE = NATIVE ? nget("ctx") : null;
-  var ctx = (CACHE && CACHE.d) || plain(hp.d) || { u: "", nm: "", r: "Viewer", t: new Date().toISOString().slice(0, 10), k: [], m: [], c: [], s: {}, a: {} };
-  var X = (CACHE && CACHE.x) || packed(hp.x) || {};
+  var ctx = plain(hp.d) || { u: "", nm: "", r: "Viewer", t: new Date().toISOString().slice(0, 10), k: [], m: [], c: [], s: {}, a: {} };
+  var X = packed(hp.x) || {};
+  var SD = X.sd || {};                       // {date: [kinds saved that day]}
+  function saved(k, d) { return contains(SD[d] || [], k); }
   ctx.k = ctx.k || []; ctx.m = ctx.m || []; ctx.s = ctx.s || {};
   var P = X.p || {}, H = X.h || {};
   var mine = ENTRY.filter(function (k) { return contains(ctx.k, k) || contains(ctx.m, k); });
@@ -423,7 +415,7 @@
   $("fb").onclick = function () { if (mainHandler) mainHandler(); };
   var backH = null;
   function backButton(handler) {
-    if (!inTelegram) { backH = handler; return; }
+    if (!inTelegram) return;
     try {
       if (backH) tg.BackButton.offClick(backH);
       backH = handler;
@@ -437,7 +429,6 @@
   }
   function alertMsg(m) { if (inTelegram && tg.showAlert) tg.showAlert(m); else alert(m); }
   function send(obj, confirmText) {
-    if (NATIVE) return nativeSend(obj, confirmText);
     var data = JSON.stringify(obj);
     if (data.length > 4000) { alertMsg("Too much to send at once. Please split it into two submissions."); return; }
     var go = function () {
@@ -448,7 +439,6 @@
   }
   function goHome() { haptic(); home(); }
   function backLink() { return inTelegram ? "" : '<button class="btn ghost" id="pBack">‹ Back</button>'; }
-  window.__lunaBack = function () { if (backH) { try { backH(); } catch (e) { home(); } return true; } return false; };
   function bindBack(fn) { if ($("pBack")) $("pBack").onclick = fn || home; }
 
   // ================================================================ people
@@ -470,21 +460,11 @@
   }
 
   // ================================================================ detail fields (status + notes)
-  // A check (✓ / ⚠) shows its note box only when ⚠ is chosen. Other boxes are plain inputs.
   function fieldsHtml(spec, vals) {
-    var paired = {};
-    spec.forEach(function (f) { if (f[2] === "st") paired[f[0].slice(0, -3)] = 1; });
     return spec.map(function (f) {
       var v = vals[f[0]];
-      if (f[2] === "st") {
-        var nk = f[0].slice(0, -3), note = spec.filter(function (x) { return x[0] === nk; })[0];
-        return '<div class="chk" data-st="' + f[0] + '"><div class="l">' + esc(f[1]) + '</div>' +
-          '<button data-v="' + ST[0] + '" class="' + (v === ST[0] ? "ok" : "") + '">✓ OK</button>' +
-          '<button data-v="' + ST[1] + '" class="' + (v === ST[1] ? "bad" : "") + '">⚠ Problem</button></div>' +
-          (note ? '<div class="chknote" data-for="' + f[0] + '" style="display:' + (v === ST[1] ? "block" : "none") + '"><input data-f="' + nk +
-            '" maxlength="' + (note[3] || 200) + '" placeholder="What is the problem? (required)" value="' + esc(vals[nk] || "") + '"></div>' : "");
-      }
-      if (paired[f[0]]) return "";
+      if (f[2] === "st") return '<div class="fld"><label>' + esc(f[1]) + '</label><div class="seg2" data-st="' + f[0] + '">' + ST.map(function (o) {
+        return '<button data-v="' + o + '" class="' + (v === o ? (o === ST[0] ? "ok" : "bad") : "") + '">' + (o === ST[0] ? "✓ " : "⚠ ") + o + "</button>"; }).join("") + "</div></div>";
       var attr = ' data-f="' + f[0] + '" maxlength="' + (f[3] || 120) + '" placeholder="' + esc(f[4] || "") + '"';
       if (f[2] === "ta") return '<div class="fld"><label>' + esc(f[1]) + "</label><textarea rows=\"2\"" + attr + ">" + esc(v == null ? "" : v) + "</textarea></div>";
       return '<div class="fld"><label>' + esc(f[1]) + "</label><input" + attr + (f[2] === "n" ? ' inputmode="decimal"' : "") + ' value="' + esc(v == null ? "" : v) + '"></div>';
@@ -496,10 +476,9 @@
       var k = sg.getAttribute("data-st"), bs = sg.querySelectorAll("button");
       for (var j = 0; j < bs.length; j++) bs[j].onclick = function () {
         select();
-        vals[k] = this.getAttribute("data-v");
+        var v = this.getAttribute("data-v");
+        if (vals[k] === v) delete vals[k]; else vals[k] = v;
         for (var x = 0; x < bs.length; x++) { var bv = bs[x].getAttribute("data-v"); bs[x].className = vals[k] === bv ? (bv === ST[0] ? "ok" : "bad") : ""; }
-        var nb = root.querySelector('[data-for="' + k + '"]');
-        if (nb) { nb.style.display = vals[k] === ST[1] ? "block" : "none"; if (vals[k] === ST[1]) { var inp = nb.querySelector("input"); if (inp) inp.focus(); } }
       };
     })(segs[i]);
     var ins = root.querySelectorAll("[data-f]");
@@ -514,10 +493,11 @@
 
   // ================================================================ HOME: my data entry
   function statusOf(k) {
-    if (contains(ORDER, k) || k === "inspect") return ctx.s[k] ? ["ok", "✓ Submitted"] : ["due", "Due today"];
-    if (k === "receiving") return ctx.nr ? ["ok", ctx.nr + " line" + (ctx.nr > 1 ? "s" : "") + " today"] : ["due", "Due today"];
+    if (contains(ORDER, k) || k === "inspect") return ctx.s[k] ? ["ok", "✓ Saved · edit"] : ["due", "Due today"];
+    if (k === "receiving") return ctx.nr ? ["ok", ctx.nr + " truck" + (ctx.nr > 1 ? "s" : "") + " · edit"] : ["wait", "No truck yet"];
+    if (k === "condemn") { var nc = (X.cc || []).filter(function (c) { return c[1] === ctx.t; }).length; return nc ? ["ok", nc + " today · edit"] : ["wait", "Add"]; }
     if (k === "aged") return ["wait", (X.ab || []).length + " open"];
-    if (k === "stocksheet") return X.su ? ["ok", "Last: " + X.su[1].slice(5)] : ["wait", "Weekly"];
+    if (k === "stocksheet") { var ns = (X.se || []).filter(function (e) { return e[1] === ctx.t; }).length; return ns ? ["ok", ns + " today · edit"] : ["wait", "Add"]; }
     return ["wait", "Add"];
   }
   var per = "d";
@@ -528,7 +508,7 @@
       '<div class="big">' + done + "<small>of 5 daily reports in</small></div>" +
       '<div class="bar"><i style="width:' + Math.round(done / 5 * 100) + '%"></i></div><div class="statuses">' +
       ORDER.map(function (k) { return '<span class="st ' + (ctx.s[k] ? "ok" : "wait") + '">' + (ctx.s[k] ? "✓ " : "") + KINDS[k].short + "</span>"; }).join("") + "</div>" +
-      '<div class="muted" style="margin-top:8px">Every submission is posted to the group with the updated figures.</div></div>';
+      '<div class="muted" style="margin-top:8px">Your entries are saved privately and can be corrected at any time. The group receives the report at 17:00.</div></div>';
     if (mine.length) {
       h += '<div class="sect">My data entry</div>';
       mine.forEach(function (k) {
@@ -536,10 +516,10 @@
         h += '<button class="erow ' + (s[0] === "due" ? "due" : "") + '" data-k="' + k + '"><div class="ic">' + KINDS[k].icon + '</div><div class="mid"><div class="t">' + KINDS[k].name +
           '</div><div class="u">' + esc(KINDS[k].sub) + '</div></div><span class="st ' + s[0] + '">' + esc(s[1]) + "</span></button>";
       });
-    } else h += '<div class="card"><div class="note">You have view access. Daily reports are posted to the group. Use the buttons below for the Excel report and traceability.</div></div>';
+    } else h += '<div class="card"><div class="note">You have view access. The daily report is posted to the group at 17:00. Use the buttons below to get it now, in your chat.</div></div>';
     if (ctx.su || (!mine.length && ctx.vw)) {     // admin and viewers (Wada, Hawi)
       var labels = { d: "Daily", w: "Weekly", m: "Monthly" };
-      h += '<div class="sect">Reports & traceability</div><div class="card"><div class="h">📊 Excel report</div><div class="seg" style="box-shadow:none;background:var(--bg)">' +
+      h += '<div class="sect">Reports & traceability</div><button class="btn" id="cardB">🗂 Today\'s report card (to my chat)</button><div class="card" style="margin-top:12px"><div class="h">📊 Excel report</div><div class="seg" style="box-shadow:none;background:var(--bg)">' +
         ["d", "w", "m"].map(function (k) { return '<button data-p="' + k + '" class="' + (k === per ? "on" : "") + '">' + labels[k] + "</button>"; }).join("") + "</div>" +
         '<button class="btn" id="xl" style="margin-top:10px">Send ' + labels[per].toLowerCase() + " Excel to my chat</button></div>" +
         '<div class="card"><div class="h">🔎 Traceability (form ' + esc(C.FORM) + ")</div>" +
@@ -550,13 +530,6 @@
         '<div class="two"><button class="btn ghost" id="trGo">Trace in chat</button><button class="btn" id="trForm" style="margin-top:0">Get form (Excel)</button></div>' +
         '<div class="muted" style="margin-top:8px">Batch = production date · owner · species. Expiry = production date + ' + ctx.sl + " days.</div></div>";
     }
-    if (NATIVE) {
-      if (ctx.paused) h = '<div class="warn">⏸ ' + esc(ctx.pmsg || "Entries are paused by the admin. You can still enter; they are sent later.") + "</div>" + h;
-      var bad = results().filter(function (x) { return !x.ok && Date.now() - new Date(x.at).getTime() < 86400000; });
-      if (bad.length) h = '<div class="warn">⛔ ' + bad.length + ' entr' + (bad.length > 1 ? "ies were" : "y was") + ' not accepted. Open <b>This phone</b> to see why.</div>' + h;
-      h += '<div class="sect">More</div>' + (ctx.vw || ctx.su || mine.length ? '<button class="btn" id="hRep">📊 Reports</button>' : "") +
-        '<button class="btn ghost" id="hPhone">📱 This phone · connection</button>';
-    }
     h += '<div class="sect">Learn</div><div class="two"><button class="btn ghost" id="hHelp">❓ Help</button><button class="btn ghost" id="hTrain" style="margin-top:0">🎓 Training</button></div>' + footer();
     $("homeW").innerHTML = h;
     var b = $("homeW").querySelectorAll(".erow");
@@ -564,14 +537,13 @@
     var ps = $("homeW").querySelectorAll("[data-p]");
     for (i = 0; i < ps.length; i++) ps[i].onclick = function () { select(); per = this.getAttribute("data-p"); home(); };
     if ($("xl")) $("xl").onclick = function () { send({ v: 2, cmd: "excel", p: per }, "Send the Excel report to this chat?"); };
+    if ($("cardB")) $("cardB").onclick = function () { send({ v: 2, cmd: "card" }, "Send today's report card to this chat?"); };
     function lot() { var v = $("trLot").value.trim().toUpperCase(); if (!/^(LV-)?\d{6}-[A-Z0-9-]+$/.test(v)) { alertMsg("Type a batch like 261012-LUNA-GOT or a livestock lot like LV-261012-01."); return ""; } return v; }
     if ($("trPick")) $("trPick").onchange = function () { $("trLot").value = this.value; };
     if ($("trGo")) $("trGo").onclick = function () { var v = lot(); if (v) send({ v: 2, cmd: "trace", lot: v }); };
     if ($("trForm")) $("trForm").onclick = function () { var v = lot(); if (!v) return; if (v.indexOf("LV-") === 0) { alertMsg("The form is made per batch (e.g. 261012-LUNA-GOT). Use Trace in chat for a livestock lot."); return; }
       send({ v: 2, cmd: "traceform", lot: v, why: $("trWhy").value.trim() }, "Send form " + C.FORM + " for " + v + " to this chat?"); };
     $("hHelp").onclick = function () { haptic(); openPage("help"); };
-    if ($("hRep")) $("hRep").onclick = function () { openReports("today"); };
-    if ($("hPhone")) $("hPhone").onclick = phonePage;
     $("hTrain").onclick = function () { haptic(); openPage("train"); };
   }
   function openTask(k) {
@@ -589,9 +561,11 @@
     var svc = (ctx.c || []).map(function (c) { return { o: "svc", n: c, label: c }; });
     return own.concat(svc);
   }
-  function loadPrefill(k) {
-    values = {};
-    (P[k] || []).forEach(function (s) {
+  function loadPrefill(k, d) {
+    values = {}; lvEx = "";
+    var pk = P[k] || {};
+    var secs = Object.prototype.toString.call(pk) === "[object Array]" ? (d === ctx.t ? pk : []) : (pk[d] || []);
+    secs.forEach(function (s) {
       var key = s.o + "|" + (s.n || ""); values[key] = {};
       keys(s.v).forEach(function (sp) {
         var v = s.v[sp];
@@ -601,7 +575,7 @@
     });
   }
   function openEntry(k) {
-    if (kind !== k) { kind = k; date = ctx.t; loadPrefill(k); sel = null; }
+    if (kind !== k) { kind = k; date = ctx.t; loadPrefill(k, date); sel = null; }
     var ss = sections();
     sel = sel && ss.some(function (s) { return secKey(s) === secKey(sel); }) ? sel : ss[0];
     show("entry");
@@ -622,7 +596,12 @@
     var seg = $("dateSeg"); seg.innerHTML = "";
     [["Yesterday", addDays(ctx.t, -1)], ["Today", ctx.t]].concat(kind === "order" ? [["Tomorrow", addDays(ctx.t, 1)]] : []).forEach(function (x) {
       var b = document.createElement("button"); b.textContent = x[0]; b.className = x[1] === date ? "on" : "";
-      b.onclick = function () { select(); date = x[1]; renderEntry(); }; seg.appendChild(b);
+      b.onclick = function () {
+        select();
+        if (x[1] === date) return;
+        if (saved(kind, x[1]) || saved(kind, date)) loadPrefill(kind, x[1]);   // that day's saved numbers, ready to correct
+        date = x[1]; renderEntry();
+      }; seg.appendChild(b);
     });
     var chips = $("chips"); chips.innerHTML = "";
     sections().forEach(function (s) {
@@ -637,7 +616,7 @@
     var cards = $("cards"); cards.innerHTML = "";
     var key = secKey(sel); values[key] = values[key] || {};
     SPECIES.forEach(function (sp) { cards.appendChild(KINDS[kind].unit === "heads" ? headsCard(key, sp) : pcsKgCard(key, sp)); });
-    $("entryNote").textContent = {
+    $("entryNote").textContent = (saved(kind, date) ? "✏️ " + dayLabel(date) + " is already saved: the saved numbers are loaded. Change what is wrong and save again. " : "") + {
       livestock: "Heads available for slaughter, own and each customer. Trucks and suppliers go in Livestock Receiving.",
       antemortem: "Heads that passed ante-mortem inspection. Rejected animals go to Condemnation & Damage.",
       order: "Estimated pieces. Kg is estimated from the recent average carcass weight; type over it to change.",
@@ -729,7 +708,7 @@
     show("review");
     backButton(function () { haptic(); show("entry"); backButton(goHome); updateMain(); });
     $("rTitle").textContent = KINDS[kind].name + " · " + dayLabel(date);
-    var heads = KINDS[kind].unit === "heads", html = "", gp = 0, gk = 0;
+    var heads = KINDS[kind].unit === "heads", html = '<div class="editbar">✏️ Something wrong? <button id="rEdit">Edit numbers</button></div>', gp = 0, gk = 0;
     sections().forEach(function (s) {
       var vs = values[secKey(s)] || {}, rows = SPECIES.filter(function (sp) { return has(vs[sp]); });
       if (!rows.length) return;
@@ -744,7 +723,7 @@
       html += "</div>"; gp += tp; gk += tk;
     });
     var probs = problems();
-    html = '<div class="list"><div class="li tot"><div class="l">' + (kind === "order" ? "Estimated total" : "Grand total") + '</div><div class="r2">' + (heads ? fmt0(gp) + " heads" : fmt0(gp) + " pcs · " + fmt(gk) + " kg") + "</div></div></div>" + html;
+    html = html.replace('</button></div>', '</button></div><div class="list"><div class="li tot"><div class="l">' + (kind === "order" ? "Estimated total" : "Grand total") + '</div><div class="r2">' + (heads ? fmt0(gp) + " heads" : fmt0(gp) + " pcs · " + fmt(gk) + " kg") + "</div></div></div>");
     html += probs.map(function (p) { return '<div class="warn">⚠️ ' + esc(p) + "</div>"; }).join("");
     var lvDiff = kind === "livestock" ? livestockDiffs() : [];
     if (kind === "livestock" && X.bk) {
@@ -756,15 +735,9 @@
     if (kind === "production" || kind === "dispatch") {
       var spec = kind === "production" ? F_PROD : F_DISP, nv = notes[kind];
       if (kind === "dispatch") { if (!nv.pack_dt) nv.pack_dt = dmy(date) + " "; if (!nv.deliv_dt) nv.deliv_dt = dmy(date) + " "; }
-      if (kind === "production") allOk(F_PROD, nv);
-      var filled = spec.filter(function (f) { return f[2] !== "st" && nv[f[0]]; });
-      var known = keys(cleanVals(nv)).length > (kind === "production" ? 3 : 2);
       html += '<div class="wrap" id="det"><div class="card"><div class="h">' + (kind === "production" ? "🧊 Processing & chilling" : "📦 Packing & delivery") +
-        '<span class="sub">for traceability</span></div>' +
-        (known ? '<div class="muted" style="margin-bottom:6px">Same as last time. Open only if something changed.</div>' +
-          filled.slice(0, 4).map(function (f) { return '<div class="sumrow"><span>' + esc(f[1]) + "</span><b>" + esc(nv[f[0]]) + "</b></div>"; }).join("") : "") +
-        '<details class="more"' + (known ? "" : " open") + '><summary>' + (known ? "Change details" : "Fill the details") + '</summary><div style="margin-top:8px">' +
-        fieldsHtml(spec, nv) + "</div></details></div>";
+        '<span class="sub">for traceability</span></div><div class="muted" style="margin-bottom:10px">Pre-filled from last time. Change only what is different today.</div>' +
+        '<button class="btn ghost" id="allOk" style="margin-bottom:12px">✓ Mark all Satisfactory</button>' + fieldsHtml(spec, nv) + "</div>";
       if (kind === "dispatch" && dispCustomers().length) {
         html += '<div class="card"><div class="h">Customer address & telephone</div>' + dispCustomers().map(function (c) {
           var ci = custInfo[c] || {};
@@ -773,10 +746,12 @@
       }
       html += "</div>";
     }
-    if (ctx.s && ctx.s[kind] && date === ctx.t) html += '<p class="note" style="margin:0 16px 12px">This replaces today\'s earlier ' + KINDS[kind].name + ".</p>";
+    if (saved(kind, date)) html += '<p class="note" style="margin:0 16px 12px">Saving replaces the ' + KINDS[kind].name + " already saved for " + dayLabel(date) + ".</p>";
     $("rBody").innerHTML = html;
+    $("rEdit").onclick = function () { haptic(); show("entry"); backButton(goHome); updateMain(); };
     if ($("det")) {
       bindFields($("det"), notes[kind]);
+      $("allOk").onclick = function () { haptic(); allOk(kind === "production" ? F_PROD : F_DISP, notes[kind]); openReview(); };
       var ca = $("det").querySelectorAll("[data-ca],[data-ct]");
       for (var i = 0; i < ca.length; i++) ca[i].oninput = function () {
         var c = this.getAttribute("data-ca") || this.getAttribute("data-ct"); custInfo[c] = custInfo[c] || {};
@@ -785,7 +760,7 @@
     }
     if ($("lvEx")) $("lvEx").oninput = function () { lvEx = this.value; };
     var blocked = probs.some(function (p) { return p.indexOf("missing") >= 0; });
-    mainButton(blocked ? "FIX THE MISSING ITEMS" : "SUBMIT TO GROUP", !blocked, blocked ? null : function () {
+    mainButton(blocked ? "FIX THE MISSING ITEMS" : (saved(kind, date) ? "SAVE CHANGES" : "SAVE"), !blocked, blocked ? null : function () {
       if (kind === "livestock" && livestockDiffs().length && !lvEx.trim()) { alertMsg("The count differs from the trucks received. Add a short explanation."); return; }
       submitDaily();
     });
@@ -823,7 +798,7 @@
     }
     return payload;
   }
-  function submitDaily() { send(payloadDaily(), "Submit " + KINDS[kind].name + " for " + dayLabel(date) + "?"); }
+  function submitDaily() { send(payloadDaily(), (saved(kind, date) ? "Save the corrected " : "Save ") + KINDS[kind].name + " for " + dayLabel(date) + "?"); }
 
   // ================================================================ shared helpers for list forms
   function opt(list, cur, ph) { return (ph ? '<option value="">' + ph + "</option>" : "") + list.map(function (x) { return "<option" + (x === cur ? " selected" : "") + ">" + esc(x) + "</option>"; }).join(""); }
@@ -835,223 +810,302 @@
   function onlyDigits(e) { e.oninput = function () { this.value = this.value.replace(/\D/g, ""); }; }
   function onlyDec(e) { e.oninput = function () { this.value = this.value.replace(",", ".").replace(/[^\d.]/g, ""); }; }
 
-  // ================================================================ LIVESTOCK AVAILABILITY (own and service)
-  // Each line: species, number, receiving date, supplier, animal location, plate number.
-  var rLines = [], rForm = { o: "own", n: "", sp: "", q: 0, rd: ctx.t, sup: "", loc: "", truck: "" }, rEdit = "";
-  function openReceiving() { show("page"); kind = null; backButton(goHome); drawReceiving(); }
-  function uniq(list) { var o = []; list.forEach(function (x) { if (x && !contains(o, x)) o.push(x); }); return o; }
+  // ================================================================ LIVESTOCK RECEIVING (form section 5)
+  var rLines = [], rDate = ctx.t, rLast = {}, rEdit = null;
+  // saved truck: [lot, species, heads, supplier, owner ("o" = own), date, live kg, address, plate, region, zone, place]
+  function savedTrucks() { return (X.rc || []).filter(function (r) { return r[5] === rDate; }); }
+  function truckToLine(r) { return { o: r[4] === "o" ? "own" : "svc", n: r[4] === "o" ? "" : r[4], sp: r[1], q: r[2], kg: r[6] || 0, sup: r[3], addr: r[7], truck: r[8], reg: r[9], zone: r[10], place: r[11] }; }
+  function openReceiving() { show("page"); kind = null; rEdit = null; backButton(goHome); drawReceiving(); }
   function drawReceiving() {
-    var F = rForm, sup = X.sup || [], lair = X.lair || [];
-    var h = '<div class="card"><div class="h">🐑 Livestock availability<span class="sub">' + dayLabel(ctx.t) + "</span></div>";
-    h += lair.length ? '<div class="muted" style="margin-bottom:4px">In lairage now (heads)</div>' + lair.map(function (r) {
-      return '<div class="sumrow"><span>' + esc(r[0]) + " · " + esc(r[1]) + "</span><b>" + fmt0(r[2]) + "</b></div>"; }).join("") : '<div class="muted">No animals in lairage yet.</div>';
+    var sup = X.sup || [], done = savedTrucks();
+    var h = '<div class="card"><div class="h">🚛 Livestock receiving<span class="sub">' + dayLabel(rDate) + "</span></div>" + dateSeg(rDate, "data-d");
+    if (done.length) h += '<div class="muted" style="margin-bottom:6px">Saved for this day: tap Edit to correct.</div>' + done.map(function (r) {
+      return '<div class="lot' + (rEdit === r[0] ? " editing" : "") + '"><div class="t">' + esc(r[0]) + ' <span class="chip g">' + fmt0(r[2]) + " hd</span></div><div class=\"u\">" + esc(r[1]) + " · " + esc(r[4] === "o" ? "Own" : r[4]) + " · " + esc(r[3]) + (r[8] ? " · " + esc(r[8]) : "") +
+        '</div><div class="acts"><button class="ed" data-ed="' + esc(r[0]) + '">✏️ Edit</button><button class="rm" data-rm="' + esc(r[0]) + '">Remove</button></div></div>'; }).join("");
+    h += rLines.length ? '<div class="h" style="margin-top:10px">New, not saved yet</div>' + rLines.map(function (l, i) {
+      return '<div class="lot"><div class="t">' + esc(l.sp) + " · " + fmt0(l.q) + ' heads <span class="chip a">new</span></div><div class="u">' + esc(l.o === "own" ? "Own" : l.n) + " · " + esc(l.sup) +
+        (l.truck ? " · " + esc(l.truck) : "") + (l.place ? " · " + esc(l.place) : "") +
+        '</div><div class="acts"><button class="ed" data-ned="' + i + '">✏️ Edit</button><button class="rm" data-del="' + i + '">Remove</button></div></div>'; }).join("")
+      : (done.length ? "" : '<div class="empty">No truck yet. Add the first one below.</div>');
     h += "</div>";
-    if (rLines.length) h += '<div class="card"><div class="h">Ready to submit<span class="sub">' + rLines.length + "</span></div>" + rLines.map(function (l, i) {
-      return '<div class="lot"><div class="t">' + esc(l.sp) + " · " + fmt0(l.q) + " · " + esc(l.o === "own" ? "Own" : l.n) + '</div><div class="u">Received ' + esc(dayLabel(l.rd)) +
-        " · " + esc(l.sup) + " · " + esc(l.loc) + " · plate " + esc(l.truck) +
-        '</div><button class="tagbtn" style="width:auto;margin-top:6px;padding:4px 10px" data-del="' + i + '">Remove</button></div>'; }).join("") + "</div>";
-    var my = X.my || [];   // [lot, owner, species, number, receiving date, supplier, location, plate]
-    if (my.length && !rEdit) h += '<div class="card"><div class="h">Your recent lines<span class="sub">correct or remove</span></div>' + my.map(function (l, i) {
-      return '<div class="lot"><div class="t">' + esc(l[0]) + " · " + esc(l[2]) + " · " + fmt0(l[3]) + " · " + esc(l[1] === "o" ? "Own" : l[1]) + '</div><div class="u">Received ' + esc(dayLabel(l[4])) +
-        " · " + esc(l[5]) + " · " + esc(l[6]) + " · plate " + esc(l[7]) + '</div><button class="tagbtn" style="width:auto;margin:6px 6px 0 0;padding:4px 12px" data-ed="' + i + '">Edit</button><button class="tagbtn" style="width:auto;margin:6px 6px 0 0;padding:4px 12px" data-rm="' + i + '">Remove</button></div>'; }).join("") + "</div>";
-    h += '<div class="card"><div class="h">' + (rEdit ? "Correct " + esc(rEdit) : "Add animals") + "</div>" +
-      '<div class="bigseg"><button data-o="own" class="' + (F.o === "own" ? "on" : "") + '">Own (Luna)</button><button data-o="svc" class="' + (F.o === "svc" ? "on" : "") + '">Service</button></div>' +
-      (F.o === "svc" ? '<div class="fld"><label>Customer</label><select id="rN">' + opt(ctx.c || [], F.n, "Choose the customer…") + "</select></div>" : "") +
-      '<div class="fld"><label>Species</label><div class="pick" id="rSp">' + SPECIES.map(function (sp) { return '<button data-sp="' + sp + '" class="' + (F.sp === sp ? "on" : "") + '">' + sp + "</button>"; }).join("") + "</div></div>" +
-      '<div class="fld"><label>Number of animals</label><div id="rQ"></div></div>' +
-      '<div class="fld"><label>Receiving date</label><input id="rRd" type="date" value="' + esc(F.rd) + '" min="' + addDays(ctx.t, -7) + '" max="' + ctx.t + '"></div>' +
-      '<div class="fld"><label>Supplier</label><input id="rSup" list="supL" maxlength="80" placeholder="Type or pick" value="' + esc(F.sup) + '"><datalist id="supL">' +
-        uniq(sup.map(function (x) { return x[0]; })).map(function (x) { return '<option value="' + esc(x) + '">'; }).join("") + "</datalist></div>" +
-      '<div class="fld"><label>Animal location</label><input id="rLoc" list="locL" maxlength="60" placeholder="e.g. Adama market, Woito" value="' + esc(F.loc) + '"><datalist id="locL">' +
-        uniq(sup.map(function (x) { return x[4]; })).map(function (x) { return '<option value="' + esc(x) + '">'; }).join("") + "</datalist></div>" +
-      '<div class="fld"><label>Plate number</label><input id="rTr" maxlength="20" placeholder="e.g. 3-12345 OR" autocapitalize="characters" value="' + esc(F.truck) + '"></div>' +
-      (rEdit ? '<button class="btn ghost" id="rCancel">Cancel the correction</button></div>' : '<button class="btn ghost" id="rAdd">+ Add to list</button></div>') +
-      '<div class="card"><div class="note">Lot numbers are given automatically. Available livestock is calculated from these lines, so there is no separate count to enter.</div></div>' + backLink() + footer();
+    var L = rLast;
+    h += (rEdit ? '<div class="editbar" style="margin:0 0 12px">✏️ Editing ' + esc(rEdit) + ' (lot number stays)<button id="rCancel">Cancel</button></div>' : "") +
+      '<div class="card"><div class="h">' + (rEdit ? "Correct the truck" : "Add a truck") + "</div>" +
+      '<div class="two"><div class="fld"><label>Owner</label><select id="rO">' + ownerOpts(L.n) + '</select></div><div class="fld"><label>Species</label><select id="rSp">' + opt(SPECIES, L.sp, "Species…") + "</select></div></div>" +
+      '<div class="two"><div class="fld"><label>Heads *</label><input id="rQ" inputmode="numeric" placeholder="0" value="' + (rEdit && L.q ? L.q : "") + '"></div><div class="fld"><label>Live kg (optional)</label><input id="rKg" inputmode="decimal" placeholder="0" value="' + (rEdit && L.kg ? L.kg : "") + '"></div></div>' +
+      '<div class="fld"><label>Supplier name *</label><input id="rSup" list="supL" maxlength="80" placeholder="Type or pick" value="' + esc(L.sup || "") + '"><datalist id="supL">' + sup.map(function (s) { return '<option value="' + esc(s[0]) + '">'; }).join("") + "</datalist></div>" +
+      '<div class="two"><div class="fld"><label>Supplier address *</label><input id="rAd" maxlength="120" value="' + esc(L.addr || "") + '"></div><div class="fld"><label>Truck plate No. *</label><input id="rTr" maxlength="20" value="' + esc(L.truck || "") + '"></div></div>' +
+      '<div class="two"><div class="fld"><label>Region *</label><input id="rRe" maxlength="40" value="' + esc(L.reg || "") + '"></div><div class="fld"><label>Zone *</label><input id="rZo" maxlength="40" value="' + esc(L.zone || "") + '"></div></div>' +
+      '<div class="fld"><label>Collection place *</label><input id="rPl" maxlength="60" value="' + esc(L.place || "") + '"></div>' +
+      (rEdit ? "" : '<button class="btn ghost" id="rAdd">+ Add truck</button>') + "</div>" +
+      '<div class="card"><div class="note">All fields are required except live kg. Each truck gets its livestock lot number automatically (LV-date-number); the bot links it to the production batch first in, first out. Disease and treatment are recorded by the vet.</div></div>' + backLink() + footer();
     $("pageW").innerHTML = h;
     bindBack();
-    $("rQ").appendChild(stepper(F.q, function (n) { F.q = n; }));
-    var ob = $("pageW").querySelectorAll("[data-o]");
-    for (var i = 0; i < ob.length; i++) ob[i].onclick = function () { select(); keep(); F.o = this.getAttribute("data-o"); drawReceiving(); };
-    var sb = $("pageW").querySelectorAll("[data-sp]");
-    for (i = 0; i < sb.length; i++) sb[i].onclick = function () { select(); F.sp = this.getAttribute("data-sp");
-      for (var j = 0; j < sb.length; j++) sb[j].className = sb[j].getAttribute("data-sp") === F.sp ? "on" : ""; };
+    if (L.o === "own" || !L.n) $("rO").value = "own";
+    var ds = $("pageW").querySelectorAll("[data-d]");
+    for (var i = 0; i < ds.length; i++) ds[i].onclick = function () { select(); rDate = this.getAttribute("data-d"); rEdit = null; drawReceiving(); };
     var dl = $("pageW").querySelectorAll("[data-del]");
-    for (i = 0; i < dl.length; i++) dl[i].onclick = function () { keep(); rLines.splice(+this.getAttribute("data-del"), 1); drawReceiving(); };
-    function keep() {
-      F.rd = $("rRd").value || ctx.t; F.sup = $("rSup").value.trim(); F.loc = $("rLoc").value.trim(); F.truck = $("rTr").value.trim().toUpperCase();
-      if ($("rN")) F.n = $("rN").value;
-    }
+    for (i = 0; i < dl.length; i++) dl[i].onclick = function () { rLines.splice(+this.getAttribute("data-del"), 1); drawReceiving(); };
+    var ne = $("pageW").querySelectorAll("[data-ned]");
+    for (i = 0; i < ne.length; i++) ne[i].onclick = function () { var j = +this.getAttribute("data-ned"); rLast = rLines[j]; rLines.splice(j, 1); haptic(); drawReceiving(); window.scrollTo(0, 9999); };
+    var ed = $("pageW").querySelectorAll("[data-ed]");
+    for (i = 0; i < ed.length; i++) ed[i].onclick = function () {
+      var lot = this.getAttribute("data-ed"), r = savedTrucks().filter(function (x) { return x[0] === lot; })[0];
+      haptic(); rEdit = lot; rLast = truckToLine(r); drawReceiving(); window.scrollTo(0, 9999);
+    };
+    var rm = $("pageW").querySelectorAll("[data-rm]");
+    for (i = 0; i < rm.length; i++) rm[i].onclick = function () {
+      var lot = this.getAttribute("data-rm");
+      send({ v: 1, k: "receiving", del: lot }, "Remove truck " + lot + "? Its lot number will not be reused.");
+    };
+    if ($("rCancel")) $("rCancel").onclick = function () { rEdit = null; rLast = {}; drawReceiving(); };
+    onlyDigits($("rQ")); onlyDec($("rKg"));
     $("rSup").onchange = function () {
       var v = this.value.trim().toLowerCase();
-      sup.forEach(function (x) { if (x[0].toLowerCase() === v) { if (!$("rLoc").value) $("rLoc").value = x[4]; } });
+      sup.forEach(function (s) { if (s[0].toLowerCase() === v) { $("rAd").value = s[1]; $("rRe").value = s[2]; $("rZo").value = s[3]; $("rPl").value = s[4]; if (!$("rTr").value) $("rTr").value = s[5]; } });
     };
-    function rErr() {
-      return F.o === "svc" && !F.n ? "Choose the customer." : !F.sp ? "Choose the species." : !F.q ? "Enter the number of animals." :
-        !F.rd ? "Enter the receiving date." : !F.sup ? "Enter the supplier." : !F.loc ? "Enter the animal location." : !F.truck ? "Enter the plate number." : "";
+    function readLine() {
+      var o = $("rO").value;
+      var l = { o: o === "own" ? "own" : "svc", n: o === "own" ? "" : o, sp: $("rSp").value, q: +$("rQ").value || 0, kg: parseFloat($("rKg").value) || 0,
+        sup: $("rSup").value.trim(), addr: $("rAd").value.trim(), truck: $("rTr").value.trim().toUpperCase(), reg: $("rRe").value.trim(), zone: $("rZo").value.trim(),
+        place: $("rPl").value.trim() };
+      var err = !l.sp ? "Choose the species." : !l.q ? "Enter the number of heads." : !l.sup ? "Enter the supplier name." : !l.addr ? "Enter the supplier address." :
+        !l.truck ? "Enter the truck plate No." : !l.reg ? "Enter the region." : !l.zone ? "Enter the zone." : !l.place ? "Enter the collection place." : "";
+      if (err) { alertMsg(err); return null; }
+      return l;
     }
-    function rLine() { return { o: F.o, n: F.o === "svc" ? F.n : "", sp: F.sp, q: F.q, rd: F.rd, sup: F.sup, loc: F.loc, truck: F.truck }; }
-    var eb = $("pageW").querySelectorAll("[data-ed]");
-    for (i = 0; i < eb.length; i++) eb[i].onclick = function () {
-      var l = my[+this.getAttribute("data-ed")]; haptic();
-      rEdit = l[0]; F.o = l[1] === "o" ? "own" : "svc"; F.n = l[1] === "o" ? "" : l[1]; F.sp = l[2]; F.q = l[3]; F.rd = l[4]; F.sup = l[5]; F.loc = l[6]; F.truck = l[7];
-      drawReceiving(); window.scrollTo(0, document.body.scrollHeight);
+    if ($("rAdd")) $("rAdd").onclick = function () {
+      var l = readLine(); if (!l) return;
+      haptic(); rLines.push(l); rLast = clone(l); rLast.q = 0; rLast.kg = 0; drawReceiving(); window.scrollTo(0, 0);
     };
-    var rb = $("pageW").querySelectorAll("[data-rm]");
-    for (i = 0; i < rb.length; i++) rb[i].onclick = function () {
-      var l = my[+this.getAttribute("data-rm")];
-      send({ v: 1, k: "receiving", del: l[0] }, "Remove " + l[0] + " (" + l[2] + ", " + l[3] + ")? It is taken out of the reports and the group post.");
-    };
-    if (rEdit) {
-      $("rCancel").onclick = function () { rEdit = ""; F.q = 0; F.sp = ""; F.truck = ""; drawReceiving(); window.scrollTo(0, 0); };
-      mainButton("SAVE CORRECTION", true, function () {
-        keep(); var err = rErr(); if (err) { alertMsg(err); return; }
-        send({ v: 1, k: "receiving", edit: rEdit, e: [rLine()] }, "Save the correction to " + rEdit + "?");
-      });
-      return;
-    }
-    $("rAdd").onclick = function () {
-      keep();
-      var err = rErr();
-      if (err) { alertMsg(err); return; }
-      haptic(); rLines.push(rLine());
-      F.q = 0; drawReceiving(); window.scrollTo(0, 0);
-    };
-    mainButton(rLines.length ? "SUBMIT " + rLines.length + " LINE" + (rLines.length > 1 ? "S" : "") + " TO GROUP" : "ADD A LINE FIRST", rLines.length > 0, rLines.length ? function () {
-      send({ v: 1, k: "receiving", e: rLines }, "Submit " + rLines.length + " line(s) of livestock?");
+    if (rEdit) mainButton("SAVE CHANGES TO " + rEdit, true, function () {
+      var l = readLine(); if (!l) return;
+      send({ v: 1, k: "receiving", ed: rEdit, e: [l] }, "Save the corrected truck " + rEdit + "?");
+    });
+    else mainButton(rLines.length ? "SAVE " + rLines.length + " TRUCK" + (rLines.length > 1 ? "S" : "") : "ADD A TRUCK FIRST", rLines.length > 0, rLines.length ? function () {
+      send({ v: 1, k: "receiving", d: rDate, e: rLines }, "Save " + rLines.length + " truck(s) for " + dayLabel(rDate) + "?");
     } : null);
   }
 
-  // ================================================================ INSPECTION & HYGIENE (form sections 6, 9, 11)
-  var iDate = ctx.t, iVals = clone(X.ins), iLd = {}, iLd0 = {};
-  (X.lv || []).forEach(function (r) { if (r[5]) iLd[r[0]] = iLd0[r[0]] = r[5]; });
-  function ldChanged() { var o = {}; keys(iLd).forEach(function (k) { if (iLd[k] !== iLd0[k]) o[k] = iLd[k]; }); return o; }
-  function openInspect() { show("page"); kind = null; backButton(goHome); drawInspect(); }
+  // ================================================================ INSPECTION & HYGIENE (by production date; form sections 6, 9, 11)
+  // The date chosen is the PRODUCTION date: the record covers that day's batches (date · owner · species)
+  // and the trucks linked to them, so the traceability form of every batch shows the right hygiene record.
+  var CHECKS = [["am", "Ante-mortem inspection"], ["pm", "Post-mortem inspection"], ["staff", "Employee health & hygiene"],
+    ["hall", "Slaughter hall"], ["lairage", "Reception & lairage"], ["truck", "Delivery truck"]];
+  var iDate = ctx.t, iVals = {}, iLd = {};
+  function loadInspect() { iVals = clone((X.ins || {})[iDate]); iLd = clone((X.ild || {})[iDate]); }
+  function openInspect() { show("page"); kind = null; backButton(goHome); loadInspect(); drawInspect(); }
   function drawInspect() {
-    var lv = X.lv || [];   // [lot, species, heads, supplier, owner, disease]
-    var h = '<div class="card"><div class="h">🔬 Inspection & hygiene<span class="sub">' + dayLabel(iDate) + "</span></div>" + dateSeg(iDate, "data-d") +
-      (ctx.s.inspect && iDate === ctx.t ? '<div class="muted" style="margin-bottom:8px">Today\'s entry is filled in. Submitting replaces it.</div>' : "") +
-      '<button class="btn" id="allOk" style="margin-bottom:6px">✓ Everything is OK today</button>' +
-      '<div class="muted" style="margin-bottom:6px">Or tap OK / Problem on each line. A problem needs a short note.</div><div id="iF">' +
-      fieldsHtml(F_INSP.filter(function (f) { return f[2] === "st" || contains(["am", "pm", "staff", "hall", "lairage", "truck"], f[0]); }), iVals) + "</div></div>" +
-      '<div class="card"><details class="more"' + (keys(iLd).length ? " open" : "") + '><summary>+ Disease & treatment by lot (optional)</summary>' +
-      (lv.length ? '<div class="muted" style="margin:6px 0 8px">Leave empty when nothing was observed.</div>' + lv.map(function (r) {
-        return '<div class="fld"><label>' + esc(r[0]) + " · " + esc(r[1]) + " · " + fmt0(r[2]) + " hd · " + esc(r[4] === "o" ? "Own" : r[4]) + " · " + esc(r[3]) +
-          '</label><input data-ld="' + esc(r[0]) + '" maxlength="200" placeholder="Pathogens / disease observed and treatment done" value="' + esc(iLd[r[0]] || "") + '"></div>'; }).join("")
-        : '<div class="empty">No livestock lots in the last 3 days.</div>') + "</details>" +
-      '<details class="more"><summary>+ Written results and remarks (optional)</summary><div id="iF2" style="margin-top:8px">' +
-      fieldsHtml(F_INSP.filter(function (f) { return contains(["disease", "treatment", "remark"], f[0]); }), iVals) + "</div></details></div>" +
-      '<div class="card"><div class="note">Animals rejected at ante-mortem and parts condemned at post-mortem are recorded with numbers in <b>Condemnation &amp; Damage</b>. Here you record the results and conditions for the traceability form.</div></div>' + backLink() + footer();
+    var pb = (X.pb || {})[iDate] || [];          // [batch, species, owner, pcs, [truck lots]]
+    var linked = {}; pb.forEach(function (b) { (b[4] || []).forEach(function (l) { linked[l] = b[0]; }); });
+    var lv = (X.lv || []).filter(function (r) { return linked[r[0]] || (!pb.length && r[6] <= iDate && r[6] >= addDays(iDate, -2)); });
+    var isSaved = !!(X.ins || {})[iDate];
+    var h = '<div class="card"><div class="h">🔬 Inspection & hygiene<span class="sub">production date</span></div>' + dateSeg(iDate, "data-d") +
+      (isSaved ? '<div class="muted" style="margin-bottom:6px">✏️ Saved for ' + dayLabel(iDate) + ': correct anything and save again.</div>' : "") +
+      '<div class="h" style="margin-top:6px">Batches produced ' + dayLabel(iDate) + "</div>" +
+      (pb.length ? '<div style="margin-top:4px">' + pb.map(function (b) {
+        return '<span class="tchip" title="' + esc(b[1] + " · " + b[2]) + '">' + esc(b[0]) + " · " + fmt0(b[3]) + "</span>"; }).join("") +
+        '</div><div class="muted">This hygiene record is attached to these ' + pb.length + " batch" + (pb.length > 1 ? "es" : "") + " and their trucks.</div>"
+        : '<div class="note">No production saved for this date yet. That is fine: this record is linked to the batches of ' + dayLabel(iDate) + " automatically when Production is saved.</div>") + "</div>";
+    h += '<div class="card"><div class="h">Checks<span class="sub">tap ✓ or ⚠</span></div>' +
+      '<button class="btn ghost" id="allOk" style="margin-bottom:6px">✓ All satisfactory</button>' +
+      CHECKS.map(function (c) {
+        var st = iVals[c[0] + "_st"];
+        return '<div class="chk"><div class="l">' + esc(c[1]) + '</div><div class="tog" data-c="' + c[0] + '"><button data-v="' + ST[0] + '" class="' + (st === ST[0] ? "ok" : "") + '">✓</button><button data-v="' + ST[1] + '" class="' + (st === ST[1] ? "bad" : "") + '">⚠</button></div></div>' +
+          (st === ST[1] ? '<div class="chknote"><input data-n="' + c[0] + '" maxlength="200" placeholder="What needs action? (required)" value="' + esc(iVals[c[0]] || "") + '"></div>' : "");
+      }).join("") + "</div>";
+    h += '<div class="card"><details class="more"' + (keys(iLd).length || iVals.disease || iVals.treatment || iVals.remark ? " open" : "") + '><summary>+ Disease, treatment or a remark (optional)</summary>' +
+      (lv.length ? lv.map(function (r) {
+        return '<div class="fld" style="margin-top:10px"><label>' + esc(r[0]) + " · " + esc(r[1]) + " · " + fmt0(r[2]) + " hd · " + esc(r[4] === "o" ? "Own" : r[4]) + (linked[r[0]] ? " → " + esc(linked[r[0]]) : "") +
+          '</label><input data-ld="' + esc(r[0]) + '" maxlength="200" placeholder="Disease observed and treatment" value="' + esc(iLd[r[0]] || "") + '"></div>'; }).join("") : "") +
+      '<div class="fld" style="margin-top:10px"><label>Final remark</label><input data-f="remark" maxlength="300" value="' + esc(iVals.remark || "") + '"></div></details></div>' +
+      '<div class="card"><div class="note">Rejected animals and condemned parts are counted in <b>Condemnation &amp; Damage</b>.</div></div>' + backLink() + footer();
     $("pageW").innerHTML = h;
     bindBack();
-    bindFields($("iF"), iVals);
-    bindFields($("iF2"), iVals);
+    var tg2 = $("pageW").querySelectorAll("[data-c]");
+    for (var i = 0; i < tg2.length; i++) (function (t) {
+      var c = t.getAttribute("data-c"), bs = t.querySelectorAll("button");
+      for (var j = 0; j < bs.length; j++) bs[j].onclick = function () { select(); var v = this.getAttribute("data-v"); if (iVals[c + "_st"] === v) delete iVals[c + "_st"]; else iVals[c + "_st"] = v; drawInspect(); };
+    })(tg2[i]);
+    var nn = $("pageW").querySelectorAll("[data-n]");
+    for (i = 0; i < nn.length; i++) nn[i].oninput = function () { var k = this.getAttribute("data-n"); if (this.value.trim()) iVals[k] = this.value.trim(); else delete iVals[k]; };
+    var rf = $("pageW").querySelectorAll("[data-f]");
+    for (i = 0; i < rf.length; i++) rf[i].oninput = function () { var k = this.getAttribute("data-f"); if (this.value.trim()) iVals[k] = this.value.trim(); else delete iVals[k]; };
     var li = $("pageW").querySelectorAll("[data-ld]");
-    for (var j = 0; j < li.length; j++) li[j].oninput = function () { var k = this.getAttribute("data-ld"); if (this.value.trim()) iLd[k] = this.value.trim(); else delete iLd[k]; };
+    for (i = 0; i < li.length; i++) li[i].oninput = function () { var k = this.getAttribute("data-ld"); if (this.value.trim()) iLd[k] = this.value.trim(); else delete iLd[k]; };
     var ds = $("pageW").querySelectorAll("[data-d]");
-    for (var i = 0; i < ds.length; i++) ds[i].onclick = function () { select(); iDate = this.getAttribute("data-d"); drawInspect(); };
-    $("allOk").onclick = function () { haptic(); allOk(F_INSP, iVals); drawInspect(); };
-    mainButton("SUBMIT TO GROUP", true, function () {
+    for (i = 0; i < ds.length; i++) ds[i].onclick = function () { select(); iDate = this.getAttribute("data-d"); loadInspect(); drawInspect(); };
+    $("allOk").onclick = function () { haptic(); CHECKS.forEach(function (c) { iVals[c[0] + "_st"] = ST[0]; }); drawInspect(); };
+    mainButton(isSaved ? "SAVE CHANGES" : "SAVE HYGIENE", true, function () {
       var v = cleanVals(iVals);
-      var miss = INSP_REQ.filter(function (k) { return !v[k]; }).map(function (k) { return F_INSP.filter(function (f) { return f[0] === k; })[0][1]; });
-      if (miss.length) { alertMsg("Tap OK or Problem for: " + miss.join(", ") + "."); return; }
-      var nn = INSP_REQ.filter(function (k) { return v[k] === ST[1] && !v[k.slice(0, -3)]; });
-      if (nn.length) { alertMsg("Write a short note for each ⚠ Problem."); return; }
-      send({ k: "inspect", d: iDate, v: v, ld: ldChanged() }, "Submit inspection & hygiene for " + dayLabel(iDate) + "?");
+      CHECKS.forEach(function (c) { if (v[c[0] + "_st"] === ST[0]) delete v[c[0]]; });   // notes only for ⚠
+      var miss = CHECKS.filter(function (c) { return !v[c[0] + "_st"]; }).map(function (c) { return c[1]; });
+      if (miss.length) { alertMsg("Tap ✓ or ⚠ for: " + miss.join(", ") + "."); return; }
+      if (CHECKS.some(function (c) { return v[c[0] + "_st"] === ST[1] && !v[c[0]]; })) { alertMsg("Write what needs action for each ⚠."); return; }
+      send({ k: "inspect", d: iDate, v: v, ld: cleanVals(iLd) }, "Save inspection & hygiene for production date " + dayLabel(iDate) + "?");
     });
   }
 
   // ================================================================ CONDEMNATION & DAMAGE
-  var cLines = [], cDate = ctx.t, cSpLast = "", cEdit = null;
+  var cLines = [], cDate = ctx.t, cSpLast = "", cEdit = null, cForm = {};
+  // saved line: [id, date, stage, owner ("o" = own), species, category, product, pcs, kg, reason, note]
   function reasonOpts(cur) { return '<option value="">Reason…</option>' + keys(C.REASONS).map(function (g) { return '<optgroup label="' + esc(g) + '">' + C.REASONS[g].map(function (r) { return "<option" + (r === cur ? " selected" : "") + ">" + esc(r) + "</option>"; }).join("") + "</optgroup>"; }).join(""); }
-  function openCondemn() { show("page"); kind = null; backButton(goHome); drawCondemn(); }
+  function openCondemn() { show("page"); kind = null; cEdit = null; cForm = {}; backButton(goHome); drawCondemn(); }
+  function savedCond() { return (X.cc || []).filter(function (c) { return c[1] === cDate; }); }
   function drawCondemn() {
+    var done = savedCond(), F = cForm;
     var h = '<div class="card"><div class="h">⚠️ Condemnation & damage<span class="sub">' + dayLabel(cDate) + "</span></div>" + dateSeg(cDate, "data-d");
-    var cm = X.cm || [];   // [id, date, stage, owner, category, product, species, pcs, kg, reason, note]
-    if (cEdit) h += '<div class="muted">Correcting: ' + esc(cEdit[5]) + " · " + esc(cEdit[6]) + " of " + esc(dayLabel(cEdit[1])) + ". Change the line below and tap Save correction.</div>";
-    else h += cLines.length ? cLines.map(function (l, i) {
+    if (done.length) h += '<div class="muted" style="margin-bottom:6px">Saved for this day: tap Edit to correct.</div>' + done.map(function (l) {
+      return '<div class="lot' + (cEdit === l[0] ? " editing" : "") + '"><div class="t">' + esc(l[6]) + " · " + esc(l[4]) + ' <span class="chip r">' + (l[7] ? fmt0(l[7]) + " pcs " : "") + (l[8] ? fmt(l[8]) + " kg" : "") + '</span></div><div class="u">' +
+        esc(l[2]) + " · " + esc(l[3] === "o" ? "Own" : l[3]) + " · " + esc(l[9]) + (l[10] ? "<br><i>" + esc(l[10]) + "</i>" : "") +
+        '</div><div class="acts"><button class="ed" data-ed="' + l[0] + '">✏️ Edit</button><button class="rm" data-rm="' + l[0] + '">Remove</button></div></div>'; }).join("");
+    h += cLines.length ? '<div class="h" style="margin-top:10px">New, not saved yet</div>' + cLines.map(function (l, i) {
       return '<div class="lot"><div class="t">' + esc(l.p) + " · " + esc(l.sp) + ' <span class="chip r">' + (l.q ? fmt0(l.q) + " pcs " : "") + (l.kg ? fmt(l.kg) + " kg" : "") + '</span></div><div class="u">' +
         esc(l.st) + " · " + esc(l.c) + " · " + esc(l.o === "own" ? "Own" : l.n) + " · " + esc(l.r) + (l.note ? "<br><i>" + esc(l.note) + "</i>" : "") +
-        '</div><button class="tagbtn" style="width:auto;margin-top:6px;padding:4px 10px" data-del="' + i + '">Remove</button></div>'; }).join("") : '<div class="empty">No lines yet. Add the first one below.</div>';
+        '</div><div class="acts"><button class="ed" data-ned="' + i + '">✏️ Edit</button><button class="rm" data-del="' + i + '">Remove</button></div></div>'; }).join("") : (done.length ? "" : '<div class="empty">No lines yet. Add the first one below.</div>');
     h += "</div>";
-    if (cm.length && !cEdit) h += '<div class="card"><div class="h">Your recent lines<span class="sub">correct or remove</span></div>' + cm.map(function (l, i) {
-      return '<div class="lot"><div class="t">' + esc(l[5]) + " · " + esc(l[6]) + ' <span class="chip r">' + (l[7] ? fmt0(l[7]) + " pcs " : "") + (l[8] ? fmt(l[8]) + " kg" : "") + '</span></div><div class="u">' +
-        esc(dayLabel(l[1])) + " · " + esc(l[2]) + " · " + esc(l[3] === "o" ? "Own" : l[3]) + " · " + esc(l[9]) + (l[10] ? "<br><i>" + esc(l[10]) + "</i>" : "") +
-        '</div><button class="tagbtn" style="width:auto;margin:6px 6px 0 0;padding:4px 12px" data-ed="' + i + '">Edit</button><button class="tagbtn" style="width:auto;margin:6px 6px 0 0;padding:4px 12px" data-rm="' + i + '">Remove</button></div>'; }).join("") + "</div>";
-    h += '<div class="card"><div class="h">' + (cEdit ? "Corrected line" : "Add a line") + "</div>" +
-      '<div class="two"><div class="fld"><label>Stage</label><select id="cSt">' + opt(C.STAGES, "Post-mortem") + '</select></div><div class="fld"><label>Owner</label><select id="cOw">' + ownerOpts("") + "</select></div></div>" +
-      '<div class="two"><div class="fld"><label>Species</label><select id="cSp">' + opt(SPECIES, cSpLast, "Species…") + '</select></div><div class="fld"><label>Category</label><select id="cCat">' + opt(C.CATEGORIES, "Offal & by-products") + "</select></div></div>" +
+    h += (cEdit ? '<div class="editbar" style="margin:0 0 12px">✏️ Editing a saved line<button id="cCancel">Cancel</button></div>' : "") +
+      '<div class="card"><div class="h">' + (cEdit ? "Correct the line" : "Add a line") + "</div>" +
+      '<div class="two"><div class="fld"><label>Stage</label><select id="cSt">' + opt(C.STAGES, F.st || "Post-mortem") + '</select></div><div class="fld"><label>Owner</label><select id="cOw">' + ownerOpts(F.n || "") + "</select></div></div>" +
+      '<div class="two"><div class="fld"><label>Species</label><select id="cSp">' + opt(SPECIES, F.sp || cSpLast, "Species…") + '</select></div><div class="fld"><label>Category</label><select id="cCat">' + opt(C.CATEGORIES, F.c || "Offal & by-products") + "</select></div></div>" +
       '<div class="fld"><label>Product (approved item list)</label><select id="cPr"></select></div>' +
-      '<div class="two"><div class="fld"><label>Pcs</label><input id="cQ" inputmode="numeric" placeholder="0"></div><div class="fld"><label>Kg</label><input id="cKg" inputmode="decimal" placeholder="0"></div></div>' +
-      '<div class="fld"><label>Reason</label><select id="cR">' + reasonOpts("") + "</select></div>" +
-      '<div class="fld"><label>Note (required for Other)</label><input id="cN" maxlength="120" placeholder="Short note"></div>' +
-      (cEdit ? '<button class="btn ghost" id="cCancel">Cancel the correction</button></div>' : '<button class="btn ghost" id="cAdd">+ Add line</button></div>');
+      '<div class="two"><div class="fld"><label>Pcs</label><input id="cQ" inputmode="numeric" placeholder="0" value="' + (F.q || "") + '"></div><div class="fld"><label>Kg</label><input id="cKg" inputmode="decimal" placeholder="0" value="' + (F.kg || "") + '"></div></div>' +
+      '<div class="fld"><label>Reason</label><select id="cR">' + reasonOpts(F.r || "") + "</select></div>" +
+      '<div class="fld"><label>Note (required for Other)</label><input id="cN" maxlength="120" placeholder="Short note" value="' + esc(F.note || "") + '"></div>' +
+      (cEdit ? "" : '<button class="btn ghost" id="cAdd">+ Add line</button>') + "</div>";
     h += '<div class="card"><div class="note">Stages <b>Chiller</b>, <b>Storage</b> and <b>Dispatch / Transport</b> reduce carcass stock. Ante-mortem and post-mortem losses are not in stock yet.</div></div>';
     $("pageW").innerHTML = h + backLink() + footer();
     bindBack();
     var ds = $("pageW").querySelectorAll("[data-d]");
-    for (var i = 0; i < ds.length; i++) ds[i].onclick = function () { select(); cDate = this.getAttribute("data-d"); drawCondemn(); };
+    for (var i = 0; i < ds.length; i++) ds[i].onclick = function () { select(); cDate = this.getAttribute("data-d"); cEdit = null; cForm = {}; drawCondemn(); };
     var dl = $("pageW").querySelectorAll("[data-del]");
     for (i = 0; i < dl.length; i++) dl[i].onclick = function () { cLines.splice(+this.getAttribute("data-del"), 1); drawCondemn(); };
+    var ne = $("pageW").querySelectorAll("[data-ned]");
+    for (i = 0; i < ne.length; i++) ne[i].onclick = function () { var j = +this.getAttribute("data-ned"); cForm = cLines[j]; cLines.splice(j, 1); haptic(); drawCondemn(); window.scrollTo(0, 9999); };
+    var ed = $("pageW").querySelectorAll("[data-ed]");
+    for (i = 0; i < ed.length; i++) ed[i].onclick = function () {
+      var id = +this.getAttribute("data-ed"), l = savedCond().filter(function (x) { return x[0] === id; })[0];
+      cEdit = id; cForm = { st: l[2], o: l[3] === "o" ? "own" : "svc", n: l[3] === "o" ? "" : l[3], sp: l[4], c: l[5], p: l[6], q: l[7], kg: l[8], r: l[9], note: l[10] };
+      haptic(); drawCondemn(); window.scrollTo(0, 9999);
+    };
+    var rm = $("pageW").querySelectorAll("[data-rm]");
+    for (i = 0; i < rm.length; i++) rm[i].onclick = function () { send({ v: 1, k: "condemn", del: +this.getAttribute("data-rm") }, "Remove this condemnation line?"); };
+    if ($("cCancel")) $("cCancel").onclick = function () { cEdit = null; cForm = {}; drawCondemn(); };
     function prods() {
       var c = $("cCat").value, sp = $("cSp").value;
       var list = (C.PRODUCTS[c] || []).filter(function (p) { return !sp || contains(p[1], sp); }).map(function (p) { return p[0]; });
-      $("cPr").innerHTML = list.length ? opt(list) : '<option value="">No item for this species</option>';
+      $("cPr").innerHTML = list.length ? opt(list, F.p) : '<option value="">No item for this species</option>';
       if (c === "Live animal") $("cSt").value = "Ante-mortem";
     }
     $("cCat").onchange = prods; $("cSp").onchange = function () { cSpLast = this.value; prods(); }; prods();
     onlyDigits($("cQ")); onlyDec($("cKg"));
-    function cLine() {
+    function readLine() {
       var ow = $("cOw").value;
-      return { st: $("cSt").value, o: ow === "own" ? "own" : "svc", n: ow === "own" ? "" : ow, c: $("cCat").value, p: $("cPr").value, sp: $("cSp").value,
+      var l = { st: $("cSt").value, o: ow === "own" ? "own" : "svc", n: ow === "own" ? "" : ow, c: $("cCat").value, p: $("cPr").value, sp: $("cSp").value,
         q: +$("cQ").value || 0, kg: parseFloat($("cKg").value) || 0, r: $("cR").value, note: $("cN").value.trim() };
-    }
-    function cErr(l) {
-      return !l.sp ? "Choose the species." : !l.p ? "Choose the product." : !l.r ? "Choose the reason." : (!l.q && !l.kg) ? "Enter pcs and/or kg." : (l.r.indexOf("Other") === 0 && !l.note) ? "Add a note for Other." :
+      var err = !l.sp ? "Choose the species." : !l.p ? "Choose the product." : !l.r ? "Choose the reason." : (!l.q && !l.kg) ? "Enter pcs and/or kg." : (l.r.indexOf("Other") === 0 && !l.note) ? "Add a note for Other." :
         (l.c === "Live animal" && l.st !== "Ante-mortem") ? "Live animals are rejected at ante-mortem." : "";
+      if (err) { alertMsg(err); return null; }
+      return l;
     }
-    var eb = $("pageW").querySelectorAll("[data-ed]");
-    for (i = 0; i < eb.length; i++) eb[i].onclick = function () { haptic(); cEdit = cm[+this.getAttribute("data-ed")]; cDate = cEdit[1]; drawCondemn(); window.scrollTo(0, 0); };
-    var rb = $("pageW").querySelectorAll("[data-rm]");
-    for (i = 0; i < rb.length; i++) rb[i].onclick = function () {
-      var l = cm[+this.getAttribute("data-rm")];
-      send({ v: 1, k: "condemn", del: l[0] }, "Remove " + l[5] + " (" + l[6] + ") of " + dayLabel(l[1]) + "? It is taken out of the reports and the group post.");
-    };
-    if (cEdit) {
-      var E = cEdit;
-      $("cOw").value = E[3] === "o" ? "own" : E[3]; $("cSp").value = E[6]; $("cCat").value = E[4]; prods();
-      $("cPr").value = E[5]; $("cSt").value = E[2]; $("cQ").value = E[7] || ""; $("cKg").value = E[8] || ""; $("cR").value = E[9]; $("cN").value = E[10] || "";
-      $("cCancel").onclick = function () { cEdit = null; cDate = ctx.t; drawCondemn(); window.scrollTo(0, 0); };
-      mainButton("SAVE CORRECTION", true, function () {
-        var l = cLine(), err = cErr(l); if (err) { alertMsg(err); return; }
-        send({ v: 1, k: "condemn", edit: E[0], d: cDate, e: [l] }, "Save the correction for " + dayLabel(cDate) + "?");
-      });
-      return;
-    }
-    $("cAdd").onclick = function () {
-      var l = cLine(), err = cErr(l);
-      if (err) { alertMsg(err); return; }
-      haptic(); cLines.push(l); drawCondemn(); window.scrollTo(0, 0);
-    };
-    mainButton(cLines.length ? "SUBMIT " + cLines.length + " LINE" + (cLines.length > 1 ? "S" : "") + " TO GROUP" : "ADD A LINE FIRST", cLines.length > 0, cLines.length ? function () {
-      send({ v: 1, k: "condemn", d: cDate, e: cLines }, "Submit " + cLines.length + " condemnation line(s) for " + dayLabel(cDate) + "?");
+    if ($("cAdd")) $("cAdd").onclick = function () { var l = readLine(); if (!l) return; haptic(); cLines.push(l); cForm = {}; drawCondemn(); window.scrollTo(0, 0); };
+    if (cEdit) mainButton("SAVE CHANGES", true, function () { var l = readLine(); if (!l) return; send({ v: 1, k: "condemn", ed: cEdit, e: [l] }, "Save the corrected line?"); });
+    else mainButton(cLines.length ? "SAVE " + cLines.length + " LINE" + (cLines.length > 1 ? "S" : "") : "ADD A LINE FIRST", cLines.length > 0, cLines.length ? function () {
+      send({ v: 1, k: "condemn", d: cDate, e: cLines }, "Save " + cLines.length + " condemnation line(s) for " + dayLabel(cDate) + "?");
     } : null);
   }
 
-  // ================================================================ STOCK INPUT SHEET (Excel template)
-  function openStock() {
-    show("page"); kind = null; backButton(goHome); mainButton("", false, null);
-    var su = X.su;   // last upload [d1, d2, rows, flagged, at]
-    $("pageW").innerHTML = '<div class="card"><div class="h">📦 Stock Input Sheet<span class="sub">approved template</span></div>' +
-      '<ol class="note" style="padding-left:18px;margin:0"><li>Tap a button below: the bot sends the sheet, already filled with the opening stock and the carcass lines from the daily reports.</li>' +
-      '<li>Fill offal, by-products, hides and the <b>physical count</b>. Explain every difference in the Explanation column.</li>' +
-      '<li>' + (NATIVE ? "Send the filled file to the LUNA Ops bot in Telegram, or give it to Tadele to upload on the Mac." : "Send the file back to the bot in this chat.") + ' Every row is checked; wrong rows are listed so you can correct and resend.</li></ol>' +
-      '<div class="two" style="margin-top:12px"><button class="btn" data-p="w">This week</button><button class="btn ghost" data-p="d" style="margin-top:0">Today</button></div>' +
-      '<button class="btn ghost" data-p="m">This month</button></div>' +
-      (su ? '<div class="card"><div class="h">Last upload</div><div class="note">' + esc(su[0]) + " to " + esc(su[1]) + " · " + su[2] + " rows recorded · " +
-        (su[3] ? '<b style="color:var(--red)">' + su[3] + " flagged</b>" : "none flagged") + "</div></div>" : "") + backLink() + footer();
+  // ================================================================ STOCK (approved items, unit per item)
+  // C.ITEMS: [no, name, category, unit "pcs" | "kg" | "pcs+kg"];  X.sb: {no: [book pcs, book kg]}
+  // X.se: saved entries [id, date, item no, movement, pcs, kg, note]
+  var sDate = ctx.t, sLines = [], sEdit = null, sForm = {};
+  var ITEM = {}; (C.ITEMS || []).forEach(function (it) { ITEM[it[0]] = it; });
+  var SLAB = {}; (C.SCOLS || []).forEach(function (c) { SLAB[c[0]] = c[1]; });
+  function itemOpts(cur) {
+    var groups = [], by = {};
+    (C.ITEMS || []).forEach(function (it) { if (!by[it[2]]) { by[it[2]] = []; groups.push(it[2]); } by[it[2]].push(it); });
+    return '<option value="">Choose the item…</option>' + groups.map(function (g) {
+      return '<optgroup label="' + esc(g) + '">' + by[g].map(function (it) { return '<option value="' + it[0] + '"' + (+cur === it[0] ? " selected" : "") + ">" + esc(it[1]) + "</option>"; }).join("") + "</optgroup>"; }).join("");
+  }
+  function colOpts(no, cur) {
+    var it = ITEM[no], main = it && contains(C.MAIN, it[1]);
+    return (C.SCOLS || []).filter(function (c) { return !(main && contains(C.SYS, c[0])); }).map(function (c) {
+      return '<option value="' + c[0] + '"' + (c[0] === (cur || "count") ? " selected" : "") + ">" + esc(c[1]) + "</option>"; }).join("");
+  }
+  function qtyText(no, p, kg) { var u = (ITEM[no] || [])[3] || "pcs+kg"; return [u.indexOf("pcs") >= 0 ? fmt0(p) + " pcs" : "", u.indexOf("kg") >= 0 ? fmt(kg) + " kg" : ""].filter(Boolean).join(" · "); }
+  function savedStock() { return (X.se || []).filter(function (e) { return e[1] === sDate; }); }
+  function openStock() { show("page"); kind = null; sEdit = null; sForm = {}; backButton(goHome); drawStock(); }
+  function drawStock() {
+    var F = sForm, done = savedStock();
+    var h = '<div class="card"><div class="h">📦 Stock<span class="sub">' + dayLabel(sDate) + "</span></div>" + dateSeg(sDate, "data-d");
+    if (done.length) h += '<div class="muted" style="margin-bottom:6px">Saved for this day: tap Edit to correct.</div>' + done.map(function (e) {
+      var it = ITEM[e[2]] || [0, "?"];
+      return '<div class="lot' + (sEdit === e[0] ? " editing" : "") + '"><div class="t">' + esc(it[1]) + ' <span class="chip ' + (e[3] === "count" ? "g" : "n") + '">' + esc(qtyText(e[2], e[4], e[5])) + '</span></div><div class="u">' + esc(SLAB[e[3]] || e[3]) +
+        (e[6] ? " · <i>" + esc(e[6]) + "</i>" : "") + '</div><div class="acts"><button class="ed" data-ed="' + e[0] + '">✏️ Edit</button><button class="rm" data-rm="' + e[0] + '">Remove</button></div></div>'; }).join("");
+    h += sLines.length ? '<div class="h" style="margin-top:10px">New, not saved yet</div>' + sLines.map(function (l, i) {
+      var it = ITEM[l.no] || [0, l.i];
+      return '<div class="lot"><div class="t">' + esc(it[1]) + ' <span class="chip a">' + esc(qtyText(l.no, l.p, l.kg)) + '</span></div><div class="u">' + esc(SLAB[l.c]) + (l.x ? " · <i>" + esc(l.x) + "</i>" : "") +
+        '</div><div class="acts"><button class="ed" data-ned="' + i + '">✏️ Edit</button><button class="rm" data-del="' + i + '">Remove</button></div></div>'; }).join("")
+      : (done.length ? "" : '<div class="empty">Nothing entered for this day yet.</div>');
+    h += "</div>";
+    h += (sEdit ? '<div class="editbar" style="margin:0 0 12px">✏️ Editing a saved entry<button id="sCancel">Cancel</button></div>' : "") +
+      '<div class="card"><div class="h">' + (sEdit ? "Correct the entry" : "Add an entry") + '</div>' +
+      '<div class="fld"><label>Item</label><select id="sI">' + itemOpts(F.i) + "</select></div>" +
+      '<div class="fld"><label>What is it?</label><select id="sC"></select></div>' +
+      '<div id="sQty"></div><div class="hint" id="sBook" style="display:none;margin-bottom:10px"></div>' +
+      '<div class="fld"><label id="sXl">Note</label><input id="sX" maxlength="200" placeholder="Optional" value="' + esc(F.x || "") + '"></div>' +
+      (sEdit ? "" : '<button class="btn ghost" id="sAdd">+ Add entry</button>') + "</div>" +
+      '<div class="card"><div class="note"><b>Physical count</b> sets the stock of the item; a count different from the book needs a short explanation. Receipts (own production, slaughter service, transfer in) add; sales, deboning, transfer out and damage subtract. ' +
+      "For the main carcasses (Goat, Mutton, BH Mutton, Beef, Veal) production, sales, ageing and damage come from the daily reports automatically: enter only counts and other movements.</div></div>" + backLink() + footer();
+    $("pageW").innerHTML = h;
     bindBack();
-    var b = $("pageW").querySelectorAll("[data-p]");
-    for (var i = 0; i < b.length; i++) b[i].onclick = function () { send({ v: 2, cmd: "template", p: this.getAttribute("data-p") }); };
+    function bookOf(no) { return (X.sb || {})[no] || null; }
+    function drawQty() {
+      var no = +$("sI").value, it = ITEM[no], u = it ? it[3] : "pcs+kg", c = $("sC").value;
+      $("sQty").innerHTML = !it ? "" : '<div class="two">' + (u.indexOf("pcs") >= 0 ? '<div class="fld"><label>Pcs <span class="unit">PCS</span></label><input id="sP" inputmode="numeric" placeholder="0" value="' + (F.i == no && F.p ? F.p : "") + '"></div>' : "") +
+        (u.indexOf("kg") >= 0 ? '<div class="fld"><label>Kg <span class="unit">KG</span></label><input id="sK" inputmode="decimal" placeholder="0" value="' + (F.i == no && F.kg ? F.kg : "") + '"></div>' : "") + "</div>";
+      if ($("sP")) onlyDigits($("sP")); if ($("sK")) onlyDec($("sK"));
+      var b = bookOf(no);
+      $("sBook").style.display = it ? "block" : "none";
+      $("sBook").textContent = it ? (b ? "Book stock: " + qtyText(no, b[0], b[1]) : "No book yet: start with a Physical count or Opening balance.") : "";
+      $("sXl").textContent = c === "count" ? "Explanation (required if the count differs from the book)" : "Note";
+    }
+    $("sI").onchange = function () { select(); $("sC").innerHTML = colOpts(+this.value, $("sC").value); drawQty(); };
+    $("sC").onchange = drawQty;
+    $("sC").innerHTML = colOpts(+F.i || 0, F.c); drawQty();
+    function readLine() {
+      var no = +$("sI").value, it = ITEM[no];
+      if (!it) { alertMsg("Choose the item."); return null; }
+      var l = { i: it[1], c: $("sC").value, p: $("sP") ? (+$("sP").value || 0) : 0, kg: $("sK") ? (parseFloat($("sK").value) || 0) : 0, x: $("sX").value.trim() };
+      var u = it[3], isSet = contains(C.SETS, l.c);
+      if (!isSet && !l.p && !l.kg) { alertMsg("Enter the quantity."); return null; }
+      if (u === "pcs+kg" && !isSet && (!l.p || !l.kg)) { alertMsg("Enter both pcs and kg for " + it[1] + "."); return null; }
+      if (l.c === "count") {
+        var b = bookOf(no) || [0, 0], dp = (u.indexOf("pcs") >= 0 ? l.p - b[0] : 0), dk = (u.indexOf("kg") >= 0 ? l.kg - b[1] : 0);
+        if ((Math.abs(dp) > 0.004 || Math.abs(dk) > 0.05) && !l.x && (X.sb || {})[no]) { alertMsg("The count differs from the book (" + qtyText(no, b[0], b[1]) + "). Add a short explanation."); return null; }
+      }
+      l.no = no; return l;
+    }
+    var ds = $("pageW").querySelectorAll("[data-d]");
+    for (var i = 0; i < ds.length; i++) ds[i].onclick = function () { select(); sDate = this.getAttribute("data-d"); sEdit = null; sForm = {}; drawStock(); };
+    var dl = $("pageW").querySelectorAll("[data-del]");
+    for (i = 0; i < dl.length; i++) dl[i].onclick = function () { sLines.splice(+this.getAttribute("data-del"), 1); drawStock(); };
+    var ne = $("pageW").querySelectorAll("[data-ned]");
+    for (i = 0; i < ne.length; i++) ne[i].onclick = function () { var j = +this.getAttribute("data-ned"), l = sLines[j]; sForm = { i: l.no, c: l.c, p: l.p, kg: l.kg, x: l.x }; sLines.splice(j, 1); haptic(); drawStock(); window.scrollTo(0, 9999); };
+    var ed = $("pageW").querySelectorAll("[data-ed]");
+    for (i = 0; i < ed.length; i++) ed[i].onclick = function () {
+      var id = +this.getAttribute("data-ed"), e = savedStock().filter(function (x) { return x[0] === id; })[0];
+      sEdit = id; sForm = { i: e[2], c: e[3], p: e[4], kg: e[5], x: e[6] }; haptic(); drawStock(); window.scrollTo(0, 9999);
+    };
+    var rm = $("pageW").querySelectorAll("[data-rm]");
+    for (i = 0; i < rm.length; i++) rm[i].onclick = function () { send({ v: 1, k: "stock", del: +this.getAttribute("data-rm") }, "Remove this stock entry?"); };
+    if ($("sCancel")) $("sCancel").onclick = function () { sEdit = null; sForm = {}; drawStock(); };
+    if ($("sAdd")) $("sAdd").onclick = function () { var l = readLine(); if (!l) return; haptic(); sLines.push(l); sForm = { c: l.c }; drawStock(); window.scrollTo(0, 0); };
+    function payload(lines) { return lines.map(function (l) { return { i: l.i, c: l.c, p: l.p, kg: l.kg, x: l.x }; }); }
+    if (sEdit) mainButton("SAVE CHANGES", true, function () { var l = readLine(); if (!l) return; send({ v: 1, k: "stock", d: sDate, ed: sEdit, e: payload([l]) }, "Save the corrected stock entry?"); });
+    else mainButton(sLines.length ? "SAVE " + sLines.length + " STOCK " + (sLines.length > 1 ? "ENTRIES" : "ENTRY") : "ADD AN ENTRY FIRST", sLines.length > 0, sLines.length ? function () {
+      send({ v: 1, k: "stock", d: sDate, e: payload(sLines) }, "Save " + sLines.length + " stock entr" + (sLines.length > 1 ? "ies" : "y") + " for " + dayLabel(sDate) + "?");
+    } : null);
   }
 
   // ================================================================ AGED BEEF
@@ -1064,12 +1118,18 @@
       return '<div class="lot"><div class="t">' + esc(b[0]) + ' <span class="chip ' + c + '">day ' + b[5] + '</span></div><div class="u">' + esc(b[1]) + " · " + esc(b[2]) + " · for " + esc(b[6]) +
         " · on hand <b>" + fmt0(b[3]) + " pcs · " + fmt(b[4]) + " kg</b>" + (b[5] > C.AGED_MAX ? ' · <b style="color:var(--red)">' + (b[5] - C.AGED_MAX) + " chargeable day(s)</b>" : "") +
         '</div><button class="btn ghost" style="margin-top:8px" data-rel="' + esc(b[0]) + '">Release from ' + esc(b[0]) + "</button></div>"; }).join("") : '<div class="empty">No aged beef on hand.</div>';
+    var am = X.am || [];   // recent entries [id, batch, in/out, date, pcs, kg, cut]
+    if (am.length) h += '</div><div class="card"><div class="h">Recent entries<span class="sub">wrong? remove and enter again</span></div>' + am.slice().reverse().map(function (m) {
+      return '<div class="lot"><div class="t">' + esc(m[1]) + ' <span class="chip ' + (m[2] === "in" ? "g" : "n") + '">' + (m[2] === "in" ? "Into ageing" : "Release") + '</span></div><div class="u">' + dayLabel(m[3]) + " · " + esc(m[6]) + " · " + fmt0(m[4]) + " pcs · " + fmt(m[5]) + " kg" +
+        '</div><div class="acts"><button class="rm" data-agd="' + m[0] + '">Remove</button></div></div>'; }).join("");
     h += '</div><button class="btn" id="agNew">+ New ageing batch</button>' +
       '<div class="card" style="margin-top:12px"><div class="note">Plan: maximum ' + C.AGED_MAX + " days; from day " + (C.AGED_MAX + 1) + " Fresh Kitchen pays storage. Dry ageing: 0–2 °C, 75–85% humidity, steady air flow; expect 5–15% weight loss plus trim.</div></div>" + backLink() + footer();
     $("pageW").innerHTML = h;
     bindBack();
     var b = document.querySelectorAll("[data-rel]");
     for (var i = 0; i < b.length; i++) b[i].onclick = function () { agedRelease(this.getAttribute("data-rel")); };
+    var ad = document.querySelectorAll("[data-agd]");
+    for (i = 0; i < ad.length; i++) ad[i].onclick = function () { send({ v: 1, k: "aged", a: "del", id: +this.getAttribute("data-agd") }, "Remove this aged beef entry? Enter it again if it needs correcting."); };
     $("agNew").onclick = agedNew;
   }
   function agedNew() {
@@ -1120,15 +1180,15 @@
   }
   var HELP = [
     ["How do I open the app?", "Send /start to the bot in a private chat and tap <b>📋 Open LUNA Ops</b> at the bottom. The app opens on your own data entry."],
-    ["Who enters what?", "<b>Getamesay</b>: Livestock Availability, own and service (species, number, receiving date, supplier, animal location, plate number). <b>Dr. Tekeste</b>: Antemortem, Inspection &amp; Hygiene (daily checks, disease and treatment by lot) and Condemnation. <b>Sinidu</b>: Production Order, Production, Dispatch, Aged Beef, Stock Input Sheet and Condemnation. Wada Abe and Hawi Gemechu get the Excel report and traceability forms. Tadele (Super Admin) can do everything."],
-    ["Where do I see the reports?", "In the Telegram group. Every submission is posted there with the status of today's reports (for example 3/5, waiting for Dispatch). The full daily report and Excel are posted at 18:00. In chat: /daily, /weekly, /monthly, /stock, /excel."],
-    ["How do I enter a daily report?", "Tap your report, choose the date and the section (Own · Fresh Corner, a customer…), enter the numbers, tap <b>NEXT: REVIEW</b>. Production and Dispatch then show the traceability details, pre-filled from last time. Check and tap <b>SUBMIT TO GROUP</b>."],
-    ["I made a mistake", "Open the same report again: today's numbers are filled in. Change them and submit; the new version replaces the old one. Trucks and condemnation lines are added, not replaced: send /undo straight away, or ask the admin."],
+    ["Who enters what?", "<b>Getamesay</b>: Livestock Receiving (each truck: supplier, address, plate, species, heads, origin) and Available Livestock. <b>Dr. Tekeste</b>: Antemortem, Inspection &amp; Hygiene (ante- and post-mortem, disease and treatment by truck, daily hygiene checks) and Condemnation. <b>Sinidu</b>: Production Order, Production, Dispatch, Aged Beef, Stock Input Sheet and Condemnation. Wada Abe and Hawi Gemechu get the Excel report and traceability forms. Tadele (Super Admin) can do everything."],
+    ["Where do I see the reports?", "At 17:00 the group receives the daily report card, the table by species and the Excel report with status. Your own entries are confirmed in your private chat. Any time, in our private chat: /card, /daily, /stock, /excel (if you type them in the group, I answer you privately)."],
+    ["How do I enter a daily report?", "Tap your report, choose the date and the section (Own · Fresh Corner, a customer…), enter the numbers, tap <b>NEXT: REVIEW</b>. Production and Dispatch then show the traceability details, pre-filled from last time. Check and tap <b>SAVE</b>."],
+    ["I made a mistake", "Open the same entry again. Daily reports: choose Today or Yesterday, the saved numbers are loaded; change them and save. Trucks, condemnation, stock and hygiene: every saved line has ✏️ Edit and Remove. On the review screen, ✏️ Edit numbers takes you back before saving."],
     ["Order vs Production", "Production Order is the <b>estimate</b>. Production is the <b>actual</b> pieces and carcass kg. The reports compare the two."],
     ["What is a batch number?", "Production date · owner · species, for example 261013-LUNA-GOT. The expiry date is the production date + " + ctx.sl + " days (chilled)."],
     ["What is a livestock lot?", "Each truck received gets a lot number automatically, for example LV-261013-02; numbers never repeat. The bot links trucks to batches first in, first out, so every batch shows its suppliers and origin. Batch numbers are made automatically too and shown in the group after Production."],
-    ["How is available livestock calculated?", "From Getamesay's lines: animals received minus animals slaughtered and rejected. There is no separate count to type."],
-    ["Stock Input Sheet", "Sinidu: My data entry → Stock Input Sheet → choose the period. The bot sends the approved sheet already filled with opening stock and carcass lines. Fill offal, by-products and the physical count, explain differences, and send the file back to the bot. Wrong rows are listed so you can correct and resend."],
+    ["Why does Available Livestock show a book figure?", "Book = yesterday's closing + trucks received today. If your count is different, the app asks for a short explanation (for example dead on arrival). Every difference must be explained."],
+    ["Stock", "Sinidu: My data entry → Stock. Choose the day, pick the item from the list, choose what it is (physical count, opening balance, receipt, sale, transfer, damage) and type the quantity: pcs, kg or both, as the item is counted. A count different from the book needs a short explanation. Every saved entry can be edited or removed."],
     ["How do I get the traceability form?", "Home → Traceability: type the batch and the reason, tap <b>Get form (Excel)</b>. In chat: /traceform 261013-LUNA-GOT customer complaint. The form " + esc(C.FORM) + " is filled from the daily entries."],
     ["Why is stock flagged red?", "Chilled carcass older than " + C.STOCK_MAX + " days is flagged in the group report. Dispatch the oldest stock first and check its quality."],
     ["Aged beef rules", "Plan: maximum " + C.AGED_MAX + " days. From day " + (C.AGED_MAX + 1) + " Fresh Kitchen pays storage."],
@@ -1139,15 +1199,15 @@
 
   var LESSONS = [
     { t: "Getting started", i: "🚀", who: "Everyone",
-      c: "<p>LUNA Ops is simple: <b>each person enters only their own data</b> in the app, and the bot posts it to the group. Nobody types the same thing twice; the bot builds the daily report, stock and traceability.</p><h3>The daily flow</h3><ol><li>Livestock Receiving: each truck (Getamesay)</li><li>Available Livestock (Getamesay)</li><li>Antemortem, Inspection &amp; Hygiene (Dr. Tekeste)</li><li>Production Order: estimate (Sinidu)</li><li>Production: actual, with processing and chilling (Sinidu)</li><li>Dispatch: actual, with packing and delivery (Sinidu)</li></ol><p>After each submission the group sees the entry and how many of the 5 daily reports are in.</p>",
-      q: [["Where do you see today's figures?", ["In the Telegram group", "Only in Excel", "Nowhere"], 0, "Every submission is posted to the group."],
+      c: "<p>LUNA Ops is simple: <b>each person enters only their own data</b> in the app; the bot confirms it to you privately and sends the group one clear report at 17:00. Nobody types the same thing twice; the bot builds the daily report, stock and traceability.</p><h3>The daily flow</h3><ol><li>Livestock Receiving: each truck (Getamesay)</li><li>Available Livestock (Getamesay)</li><li>Antemortem, Inspection &amp; Hygiene (Dr. Tekeste)</li><li>Production Order: estimate (Sinidu)</li><li>Production: actual, with processing and chilling (Sinidu)</li><li>Dispatch: actual, with packing and delivery (Sinidu)</li></ol><p>At 17:00 the group sees the report card with each person's status and the figures.</p>",
+      q: [["When does the group get the daily report?", ["At 17:00", "After every entry", "Never"], 0, "One report card, the species table and the Excel at 17:00."],
           ["Who can submit Dispatch?", ["Anyone", "Only its owner (and the Super Admin)"], 1, "Each entry is locked to its owner's Telegram account."],
-          ["You entered a wrong number in Production. What do you do?", ["Open Production again, correct and submit", "Post a text in the group"], 0, "The new version replaces the old one."]] },
-    { t: "Livestock availability", i: "🐑", who: "Getamesay",
-      c: "<p>Open <b>Livestock Availability</b>. Tap <b>Own (Luna)</b> or <b>Service</b> (then choose the customer). For each lot of animals enter: <b>species</b>, <b>number</b>, <b>receiving date</b>, <b>supplier</b>, <b>animal location</b> and <b>plate number</b>, then tap <b>+ Add to list</b>. When all lines are in, tap <b>SUBMIT TO GROUP</b>.</p><p>Pick a supplier you used before and the location and plate fill in. Lot numbers are given automatically. Available livestock is calculated from your lines.</p><div class=\"sci\"><b>Why it matters:</b> traceability one step back (form " + esc(C.FORM) + ", section 5) is only possible if the source is recorded when the animals arrive.</div>",
-      q: [["60 goats from Adama market arrive on plate 3-12345. What do you enter?", ["One line: Goat, 60, today, supplier, Adama market, 3-12345", "Nothing until slaughter"], 0, "One line per lot."],
+          ["You entered a wrong number in Production. What do you do?", ["Open Production again, correct and save", "Post a text in the group"], 0, "The saved numbers load; the new version replaces the old one."]] },
+    { t: "Livestock receiving & supply", i: "🚛", who: "Getamesay",
+      c: "<p>Record <b>every truck</b> when it arrives: owner (Luna or the customer), species, heads, supplier name and address, truck plate, origin (region, zone, collection place). All are required; live kg is optional.</p><p>Pick a supplier you used before and the address and origin fill in. Each truck gets its livestock lot number automatically (LV-date-number). Disease and treatment are recorded by the vet.</p><h3>Available livestock</h3><p>Enter the heads counted per species, own and each customer. The card shows the book (yesterday + trucks). If your count differs, explain why.</p><div class=\"sci\"><b>Why it matters:</b> traceability one step back (form " + esc(C.FORM) + ", section 5; ISO 22005, Codex CAC/GL 60) is only possible if the origin is recorded when the animals arrive.</div>",
+      q: [["A truck of 60 goats from Adama market arrives. Where do you record it?", ["Livestock Receiving: one truck line", "Production"], 0, "One line per truck."],
           ["What is LV-261013-02?", ["The second truck received on 13 Oct 2026", "A carcass batch"], 0, "Livestock lot number."],
-          ["Do you type a separate count of available animals?", ["No, it is calculated from your lines", "Yes, every morning"], 0, "Available = received - slaughtered - rejected."]] },
+          ["Your count is 2 less than the book. What happens?", ["You add an explanation, for example 2 dead on arrival", "Nothing"], 0, "Every difference must be explained."]] },
     { t: "Inspection & hygiene", i: "🔬", who: "Dr. Tekeste",
       c: "<p><b>Antemortem</b>: heads that passed, by species, own and each customer.</p><p><b>Inspection &amp; Hygiene</b>: once a day, the ante-mortem and post-mortem results, disease observed and treatment <b>for each truck</b>, and hygiene of employees, slaughter hall, reception/lairage and the delivery truck. Every ✓/⚠ line is required; ⚠ needs a short note.</p><p>Rejected animals and condemned parts are counted in <b>Condemnation &amp; Damage</b>.</p><div class=\"sci\"><b>Good practice:</b> inspect at rest in good light; look for fever, abnormal breathing, discharges, lameness, emaciation. Common post-mortem findings: abscess, TB lesions, cysticercosis, hydatid cyst, fasciolosis, pneumonia.</div>",
       q: [["A goat is rejected for fever. Where do you count it?", ["Condemnation & Damage: Ante-mortem, Live animal", "Antemortem passed heads"], 0, "Antemortem records passed heads."],
@@ -1216,198 +1276,13 @@
     if ($("nextL")) $("nextL").onclick = function () { openPage("lesson", i + 1); };
   }
 
-  // ================================================================ ANDROID APP: connection, queue, reports
-  function queue() { return nget("queue") || []; }
-  function setQueue(q) { nset("queue", q); netBar(); }
-  function results() { return nget("results") || []; }
-  var NET = { state: "wait", msg: "" };
-  function netBar() {
-    if (!NATIVE) return;
-    var q = queue().length, el = $("net");
-    if (!el) return;
-    var cls = NET.state === "ok" ? "ok" : NET.state === "bad" ? "bad" : "wait";
-    var txt = NET.state === "ok" ? "● Connected" : NET.state === "bad" ? "● " + (NET.msg || "Not connected") : "● Connecting…";
-    if (q) txt += " · " + q + " waiting to send";
-    el.className = "net " + (q && NET.state !== "ok" ? "wait" : cls);
-    el.innerHTML = esc(txt) + (q ? ' <button id="netGo">Send now</button>' : "");
-    if ($("netGo")) $("netGo").onclick = function () { flush(true); };
-  }
-  function timeout(p, ms) { return new Promise(function (res, rej) { var t = setTimeout(function () { rej(new Error("timeout")); }, ms);
-    p.then(function (v) { clearTimeout(t); res(v); }, function (e) { clearTimeout(t); rej(e); }); }); }
-  function apiFetch(path, opts) {
-    opts = opts || {};
-    var h = opts.headers || {};
-    if (CFG.token) h.Authorization = "Bearer " + CFG.token;
-    h["ngrok-skip-browser-warning"] = "1"; h["X-App-Version"] = APPV; h["X-Pending"] = String(queue().length);
-    if (opts.body) h["Content-Type"] = "application/json";
-    opts.headers = h;
-    return timeout(fetch(String(CFG.server || "").replace(/\/+$/, "") + path, opts), 25000);
-  }
-  function unpaired(msg) { NET.state = "bad"; NET.msg = msg || "This phone is not connected. Pair it again."; netBar(); }
-  var flushing = false;
-  function flush(manual) {
-    if (!NATIVE || flushing || !CFG.token) return Promise.resolve();
-    var q = queue();
-    if (!q.length) return Promise.resolve();
-    flushing = true;
-    var sent = 0;
-    function next() {
-      var q2 = queue();
-      if (!q2.length) return Promise.resolve();
-      var it = q2[0];
-      return apiFetch("/api/submit", { method: "POST", body: JSON.stringify({ qid: it.qid, data: it.data }) }).then(function (r) {
-        if (r.status === 401) { unpaired("Blocked or not paired. Ask Tadele."); throw new Error("stop"); }
-        return r.json().then(function (js) {
-          if (js.retry) { NET.state = "ok"; NET.msg = ""; throw new Error("stop"); }
-          var q3 = queue().filter(function (x) { return x.qid !== it.qid; });
-          setQueue(q3);
-          var rs = results(); rs.unshift({ qid: it.qid, at: it.at, label: it.label, ok: !!js.ok, html: js.html || "" }); nset("results", rs.slice(0, 20));
-          NET.state = "ok"; NET.msg = ""; sent++;
-          return next();
-        });
-      });
-    }
-    return next().catch(function (e) {
-      if (e.message !== "stop") { NET.state = "bad"; NET.msg = "Offline"; }
-      if (manual && e.message !== "stop") alertMsg("No connection. The entries stay on the phone and are sent automatically.");
-    }).then(function () { flushing = false; netBar(); if (sent) refreshCtx(); });
-  }
-  function describe(o) {
-    var k = KINDS[o.k];
-    return (k ? k.name : "Entry") + (o.d ? " · " + dayLabel(o.d) : "");
-  }
-  function nativeSend(obj, confirmText) {
-    if (obj.cmd) return nativeCmd(obj);
-    if (confirmText && !window.confirm(confirmText)) return;
-    var qid = Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
-    var q = queue(); q.push({ qid: qid, data: obj, at: new Date().toISOString(), label: describe(obj) }); setQueue(q);
-    try { if (window.LunaNative && window.LunaNative.vibrate) window.LunaNative.vibrate(); } catch (e) {}
-    resultPage(null, "Sending…");
-    flush().then(function () {
-      var r = results().filter(function (x) { return x.qid === qid; })[0];
-      if (r) resultPage(r);
-      else resultPage(null, "📱 Saved on the phone. It will be sent automatically when the connection is back.");
-    });
-  }
-  function resultPage(r, msg) {
-    show("page"); mainButton("", false, null);
-    backButton(function () { afterResult(); });
-    $("pageW").innerHTML = '<div class="card"><div class="h">' + (r ? (r.ok ? "✅ Saved and posted" : "⛔ Not saved") : "Sending") + '</div><div class="rep">' +
-      (r ? r.html : esc(msg)) + "</div></div>" + (r && !r.ok ? '<div class="card"><div class="note">Correct it and submit again.</div></div>' : "") +
-      '<button class="btn" id="resOk">' + (r && !r.ok ? "Back" : "Done") + "</button>";
-    $("resOk").onclick = afterResult;
-  }
-  function afterResult() { refreshCtx(true); home(); }
-  function sameCtx(a, b) { try { return JSON.stringify(a) === JSON.stringify(b); } catch (e) { return false; } }
-  function refreshCtx(force) {
-    if (!NATIVE || !CFG.token) return;
-    apiFetch("/api/ctx").then(function (r) {
-      if (r.status === 401) { unpaired("Blocked or not paired. Ask Tadele."); return; }
-      return r.json().then(function (js) {
-        if (!js.ok) return;
-        NET.state = "ok"; NET.msg = ""; netBar();
-        var fresh = { d: js.d, x: js.x };
-        if (!sameCtx(fresh, CACHE)) {
-          nset("ctx", fresh);
-          var onHome = $("home").className.indexOf("on") >= 0;
-          if (onHome || force || !CACHE) location.reload();
-        }
-      });
-    }).catch(function () { NET.state = "bad"; NET.msg = "Offline"; netBar(); });
-  }
-  function download(path, name) {
-    var url = String(CFG.server || "").replace(/\/+$/, "") + path;
-    if (window.LunaNative && window.LunaNative.download) { window.LunaNative.download(url, name, CFG.token || ""); alertMsg("Downloading " + name + ". Find it in Downloads."); return; }
-    apiFetch(path).then(function (r) { return r.blob(); }).then(function (b) { var a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = name; a.click(); })
-      .catch(function () { alertMsg("No connection."); });
-  }
-  function nativeCmd(o) {
-    if (o.cmd === "excel") return download("/api/file?f=excel&p=" + (o.p || "w"), "LUNA_Report_" + (o.p || "w") + ".xlsx");
-    if (o.cmd === "template") return download("/api/file?f=template&p=" + (o.p || "w"), "Stock_Input_Sheet.xlsx");
-    if (o.cmd === "traceform") return download("/api/file?f=traceform&lot=" + encodeURIComponent(o.lot) + "&why=" + encodeURIComponent(o.why || ""), "OF-LESH-021_" + o.lot + ".xlsx");
-    if (o.cmd === "trace") return openReports("trace", o.lot);
-  }
-  var REPS = [["today", "Today"], ["daily", "Daily"], ["weekly", "Weekly"], ["monthly", "Monthly"], ["stock", "Stock"], ["aged", "Aged beef"]];
-  function openReports(k, q) {
-    show("page"); kind = null; mainButton("", false, null); backButton(goHome);
-    k = k || "today";
-    var cached = nget("rep_" + k + (q || ""));
-    $("pageW").innerHTML = '<div class="card"><div class="h">📊 Reports</div><div class="pick">' + REPS.map(function (r) {
-      return '<button data-rk="' + r[0] + '" class="' + (r[0] === k ? "on" : "") + '">' + r[1] + "</button>"; }).join("") + "</div>" +
-      '<div class="two" style="margin-top:8px"><input class="mini" id="rq" placeholder="Batch or lot to trace" value="' + esc(q || "") + '" autocapitalize="characters"><button class="tagbtn" id="rqGo">🔎 Trace</button></div></div>' +
-      '<div class="card rep" id="repBody">' + (cached ? cached.html + '<div class="muted" style="margin-top:8px">Saved ' + esc(cached.at) + ". Updating…</div>" : "Loading…") + "</div>" + backLink() + footer();
-    bindBack(goHome);
-    var b = $("pageW").querySelectorAll("[data-rk]");
-    for (var i = 0; i < b.length; i++) b[i].onclick = function () { select(); openReports(this.getAttribute("data-rk")); };
-    $("rqGo").onclick = function () { var v = $("rq").value.trim().toUpperCase(); if (v) openReports("trace", v); };
-    apiFetch("/api/report?k=" + k + (q ? "&q=" + encodeURIComponent(q) : "")).then(function (r) { return r.json(); }).then(function (js) {
-      NET.state = "ok"; netBar();
-      if ($("repBody")) $("repBody").innerHTML = js.html || "";
-      nset("rep_" + k + (q || ""), { html: js.html, at: new Date().toLocaleString("en-GB", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" }) });
-    }).catch(function () { if ($("repBody") && !cached) $("repBody").innerHTML = "No connection. Try again when online."; NET.state = "bad"; NET.msg = "Offline"; netBar(); });
-  }
-  function pairPage(link) {
-    show("page"); mainButton("", false, null); backButton(null);
-    var p = {};
-    String(link || "").replace(/[?&]([sc])=([^&]*)/g, function (m, k, v) { p[k] = decodeURIComponent(v); });
-    $("pageW").innerHTML = '<div class="card"><div class="h">🔗 Connect this phone</div><div class="note">Tadele gives you a 6-digit code on the Mac (or scan his QR code with the camera).</div>' +
-      '<div class="fld" style="margin-top:10px"><label>Server address</label><input id="pS" placeholder="https://….ngrok-free.app" value="' + esc(p.s || CFG.server || "") + '" autocapitalize="none"></div>' +
-      '<div class="fld"><label>Code</label><input id="pC" inputmode="numeric" maxlength="6" placeholder="123456" value="' + esc(p.c || "") + '" style="font-size:26px;letter-spacing:6px;text-align:center"></div>' +
-      '<button class="btn" id="pGo">Connect</button><div class="muted" id="pMsg" style="margin-top:10px"></div></div>' + footer();
-    $("pGo").onclick = function () {
-      var srv = $("pS").value.trim().replace(/\/+$/, ""), code = $("pC").value.replace(/\D/g, "");
-      if (!/^https?:\/\//.test(srv)) srv = "https://" + srv;
-      if (code.length !== 6) { alertMsg("Enter the 6-digit code."); return; }
-      $("pMsg").textContent = "Connecting…";
-      var name = "Android phone"; try { if (window.LunaNative && window.LunaNative.deviceName) name = window.LunaNative.deviceName(); } catch (e) {}
-      timeout(fetch(srv + "/api/pair", { method: "POST", headers: { "Content-Type": "application/json", "ngrok-skip-browser-warning": "1", "X-App-Version": APPV },
-        body: JSON.stringify({ code: code, name: name }) }), 25000).then(function (r) { return r.json(); }).then(function (js) {
-        if (!js.ok) { $("pMsg").textContent = js.error || "Not accepted."; return; }
-        CFG = { server: srv, token: js.token, user: js.user }; nset("cfg", CFG); nset("ctx", null);
-        location.reload();
-      }).catch(function () { $("pMsg").textContent = "Cannot reach the server. Check the address and the internet."; });
-    };
-    if (p.s && p.c) $("pGo").onclick();
-  }
-  window.__lunaLink = function (url) { if (/pair/.test(url)) pairPage(url); };
-  function phonePage() {
-    show("page"); mainButton("", false, null); backButton(goHome);
-    var q = queue(), rs = results();
-    $("pageW").innerHTML = '<div class="card"><div class="h">📱 This phone</div>' +
-      '<div class="sumrow"><span>Person</span><b>' + esc((CFG.user && CFG.user.name) || ctx.nm || "-") + "</b></div>" +
-      '<div class="sumrow"><span>Server</span><b style="word-break:break-all">' + esc(CFG.server || "-") + "</b></div>" +
-      '<div class="sumrow"><span>Waiting to send</span><b>' + q.length + "</b></div>" +
-      '<div class="sumrow"><span>App version</span><b>' + APPV + "</b></div></div>" +
-      (q.length ? '<div class="card"><div class="h">Waiting</div>' + q.map(function (x) { return '<div class="sumrow"><span>' + esc(x.label) + "</span><b>" + esc(x.at.slice(11, 16)) + "</b></div>"; }).join("") +
-        '<button class="btn" id="phGo" style="margin-top:10px">Send now</button></div>' : "") +
-      (rs.length ? '<div class="card"><div class="h">Last sent</div>' + rs.slice(0, 8).map(function (x) {
-        return '<div class="sumrow"><span>' + (x.ok ? "✅ " : "⛔ ") + esc(x.label) + "</span><b>" + esc(x.at.slice(5, 10)) + "</b></div>"; }).join("") + "</div>" : "") +
-      '<button class="btn ghost" id="phUn">Disconnect this phone</button>' + backLink() + footer();
-    bindBack(goHome);
-    if ($("phGo")) $("phGo").onclick = function () { flush(true).then(phonePage); };
-    $("phUn").onclick = function () {
-      if (q.length && !window.confirm(q.length + " entries are not sent yet and will be lost. Disconnect anyway?")) return;
-      if (!q.length && !window.confirm("Disconnect this phone?")) return;
-      nset("cfg", {}); nset("ctx", null); nset("queue", []); location.reload();
-    };
-  }
-
   // ================================================================ boot
   if (inTelegram) {
     try { tg.ready(); tg.expand(); } catch (e) {}
     try { tg.setHeaderColor("#ffffff"); tg.setBackgroundColor("#f4f5f7"); } catch (e) {}
     try { if (tg.setBottomBarColor) tg.setBottomBarColor("#ffffff"); } catch (e) {}
   }
-  if (NATIVE) {
-    document.body.className += " native";
-    var link = ""; try { if (window.LunaNative && window.LunaNative.takeLink) link = window.LunaNative.takeLink() || ""; } catch (e) {}
-    if (!CFG.token || /pair/.test(link)) pairPage(link);
-    else {
-      home(); netBar(); refreshCtx(!CACHE); flush();
-      setInterval(function () { refreshCtx(); flush(); }, 60000);
-      window.addEventListener("online", function () { flush(); refreshCtx(); });
-    }
-  } else if (ctx.o && contains(mine, ctx.o)) openTask(ctx.o); else home();
+  if (ctx.o && contains(mine, ctx.o)) openTask(ctx.o); else home();
   window.__luna = { home: home, openTask: openTask, openPage: openPage, openReview: function () { openReview(); },
                     payload: function () { return kind ? payloadDaily() : null; }, state: function () { return { kind: kind, date: date, values: values, notes: notes }; } };
 })();
