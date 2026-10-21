@@ -521,7 +521,7 @@
       '<div class="big">' + done + "<small>of 5 daily reports in</small></div>" +
       '<div class="bar"><i style="width:' + Math.round(done / 5 * 100) + '%"></i></div><div class="statuses">' +
       ORDER.map(function (k) { return '<span class="st ' + (ctx.s[k] ? "ok" : "wait") + '">' + (ctx.s[k] ? "✓ " : "") + KINDS[k].short + "</span>"; }).join("") + "</div>" +
-      '<div class="muted" style="margin-top:8px">Your entries are saved privately and can be corrected at any time. The group receives the report at 17:00.</div></div>';
+      '<div class="muted" style="margin-top:8px">Your entries are saved privately and can be corrected at any time. The group gets the report card and Excel every 30 minutes and the final report at 17:00.</div></div>';
     if (mine.length) {
       h += '<div class="sect">My data entry</div>';
       mine.forEach(function (k) {
@@ -573,7 +573,8 @@
         return '<div class="alert"><b class="i">' + (a[0] === "r" ? "🔴" : "🟠") + "</b><span>" + esc(a[1]) + "</span></div>"; }).join("") : '<div class="empty">🟢 All clear</div>') + "</div>";
     } else h += '<div class="card"><div class="empty">Tap ↻ Refresh to load today\'s figures.</div></div>';
     var labels = { d: "Daily", w: "Weekly", m: "Monthly" };
-    h += '<div class="two"><button class="btn ghost" id="rRef">↻ Refresh</button><button class="btn" id="cardB" style="margin-top:0">🗂 Report card</button></div>' +
+    h += '<div class="two"><button class="btn ghost" id="rRef">↻ Refresh</button><button class="btn ghost" id="cardB" style="margin-top:0">🗂 Report card</button></div>' +
+      '<button class="btn" id="bothB" style="margin-top:8px">🗂 Report card + 📊 Excel to my chat</button>' +
       (ctx.su ? '<button class="btn" id="postB" style="margin-top:8px">📢 Post report to the group now</button>' : "") +
       '<div class="card" style="margin-top:12px"><div class="h">📊 Excel report<span class="sub">sent to your chat</span></div><div class="seg" style="box-shadow:none;background:var(--bg)">' +
       ["d", "w", "m"].map(function (p2) { return '<button data-p="' + p2 + '" class="' + (p2 === per ? "on" : "") + '">' + labels[p2] + "</button>"; }).join("") + "</div>" +
@@ -590,6 +591,7 @@
     $("rRef").onclick = function () { send({ v: 2, cmd: "refresh" }); };
     $("xl").onclick = function () { send({ v: 2, cmd: "excel", p: per }, "Send the " + labels[per].toLowerCase() + " Excel report to your chat?"); };
     $("cardB").onclick = function () { send({ v: 2, cmd: "card" }, "Send today's report card to your chat?"); };
+    $("bothB").onclick = function () { send({ v: 2, cmd: "both" }, "Send today's report card and the Excel report to your chat?"); };
     if ($("postB")) $("postB").onclick = function () { send({ v: 2, cmd: "post" }, "Post the report card, table and Excel to the group now?"); };
     function lot() { var v = $("trLot").value.trim().toUpperCase(); if (!/^(LV-)?\d{6}-[A-Z0-9-]+$/.test(v)) { alertMsg("Type a batch like 261012-LUNA-GOT or a livestock lot like LV-261012-01."); return ""; } return v; }
     if ($("trPick")) $("trPick").onchange = function () { $("trLot").value = this.value; };
@@ -1275,7 +1277,7 @@
   var HELP = [
     ["How do I open the app?", "Send /start to the bot in a private chat and tap <b>📋 Open LUNA Ops</b> at the bottom. The app opens on your own data entry."],
     ["Who enters what?", "<b>Getamesay</b>: Available Livestock (one line per truck: owner, species, heads, supplier, plate number, origin). <b>Dr. Tekeste</b>: Antemortem, Inspection &amp; Hygiene with Processing &amp; Chilling (by production date) and Condemnation &amp; Damage. <b>Sinidu</b>: Production Order, Production, Dispatch and Stock. Wada Abe and Hawi Gemechu get the Excel report and traceability forms. Tadele (Super Admin) can do everything."],
-    ["Where do I see the reports?", "At 17:00 the group receives the daily report card, the table by species and the Excel report with status. Your own entries are confirmed in your private chat. Any time, in our private chat: /card, /daily, /stock, /excel (if you type them in the group, I answer you privately)."],
+    ["Where do I see the reports?", "In the app: Report, Stock and Team tabs. In the group: the report card, the table by species and the Excel report every 30 minutes (07:30 to 17:00, only when something changed; the previous update is replaced) and the final report at 17:00. Privately, any time: Report tab buttons, or /report (card + Excel), /card, /excel. If you type a command in the group, I answer you privately."],
     ["How do I enter a daily report?", "Tap your report, choose the date and the section (Own · Fresh Corner, a customer…), enter the numbers, tap <b>NEXT: REVIEW</b>. Production and Dispatch then show the traceability details, pre-filled from last time. Check and tap <b>SAVE</b>."],
     ["I made a mistake", "Open the same entry again. Daily reports: choose Today or Yesterday, the saved numbers are loaded; change them and save. Trucks, condemnation, stock and hygiene: every saved line has ✏️ Edit and Remove. On the review screen, ✏️ Edit numbers takes you back before saving."],
     ["Order vs Production", "Production Order is the <b>estimate</b>. Production is the <b>actual</b> pieces and carcass kg. The reports compare the two."],
@@ -1292,7 +1294,7 @@
   var LESSONS = [
     { t: "Getting started", i: "🚀", who: "Everyone",
       c: "<p>LUNA Ops is simple: <b>each person enters only their own data</b> in the app; the bot confirms it to you privately and sends the group one clear report at 17:00. Nobody types the same thing twice; the bot builds the daily report, stock and traceability.</p><h3>The daily flow</h3><ol><li>Livestock Receiving: each truck (Getamesay)</li><li>Available Livestock (Getamesay)</li><li>Antemortem, Inspection &amp; Hygiene (Dr. Tekeste)</li><li>Production Order: estimate (Sinidu)</li><li>Production: actual, with processing and chilling (Sinidu)</li><li>Dispatch: actual, with packing and delivery (Sinidu)</li></ol><p>At 17:00 the group sees the report card with each person's status and the figures.</p>",
-      q: [["When does the group get the daily report?", ["At 17:00", "After every entry", "Never"], 0, "One report card, the species table and the Excel at 17:00."],
+      q: [["When does the group get the report?", ["Every 30 minutes, final at 17:00", "After every entry", "Never"], 0, "Card, species table and Excel; the final report at 17:00."],
           ["Who can submit Dispatch?", ["Anyone", "Only its owner (and the Super Admin)"], 1, "Each entry is locked to its owner's Telegram account."],
           ["You entered a wrong number in Production. What do you do?", ["Open Production again, correct and save", "Post a text in the group"], 0, "The saved numbers load; the new version replaces the old one."]] },
     { t: "Livestock receiving & supply", i: "🚛", who: "Getamesay",
