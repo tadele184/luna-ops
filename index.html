@@ -1476,12 +1476,17 @@ var XL = (function () {
     return '<div class="pbar"><div class="pb-h"><span>' + esc(label) + "</span><b>" + (b ? fmt(a) + " / " + fmt(b) : "-") + '</b></div><div class="pb-t"><i class="' + (cls || "") + '" style="width:' + p + '%"></i></div></div>';
   }
   function greet() { var h = +String(X.hm || "12:00").slice(0, 2); return h < 12 ? "Good morning" : h < 17 ? "Good afternoon" : "Good evening"; }
-  function sharePlan() {
-    var text = X.txt || "";
-    if (window.LunaApp) return window.LunaApp.shareText(text);
-    if (navigator.share) return navigator.share({ title: "Livestock & Slaughter Plan", text: text }).catch(function () {});
-    try { navigator.clipboard.writeText(text).then(function () { alertMsg("The plan is copied. Paste it in WhatsApp or Telegram."); }); } catch (e) { alertMsg(text); }
+  function sharePlan() {          // a clean table picture of the plan (or plain text)
+    sheet('<div class="msg"><b>Share the plan</b><br>A neat table picture for WhatsApp, Telegram or email.</div>', [{ t: "🖼️ Share as a picture", v: "img" }, { t: "Share as text", v: "txt", ghost: true }, { t: "Cancel", v: "", ghost: true }]).then(function (v) {
+      if (v === "img") return planPicture().then(function (blob) { shareBlob(blob, "Slaughter_Plan_" + X.t + ".png"); });
+      if (v !== "txt") return;
+      var text = plainPlan();
+      if (window.LunaApp) return window.LunaApp.shareText(text);
+      if (navigator.share) return navigator.share({ title: "Livestock & Slaughter Plan", text: text }).catch(function () {});
+      try { navigator.clipboard.writeText(text).then(function () { alertMsg("The plan is copied. Paste it in WhatsApp or Telegram."); }); } catch (e) { alertMsg(text); }
+    });
   }
+
 
   // ---------------- STOCK (like inventory)
   function stockTab() {
@@ -1782,7 +1787,7 @@ var XL = (function () {
       (sups.length ? chips("Known suppliers (tap to fill)", sups.slice(0, 10).map(function (s, i) { return { v: String(i), l: s[0] }; }), "", "sup", "sm sug") : "") +
       '<div class="fld"><label>Supplier</label><input id="lvSup" maxlength="80" value="' + esc(F.sup) + '"></div>' +
       '<div class="two"><div class="fld"><label>Plate number</label><input id="lvPlate" maxlength="20" autocapitalize="characters" value="' + esc(F.plate) + '"></div><div class="fld"><label>Origin (location)</label><input id="lvOrg" maxlength="80" value="' + esc(F.org) + '"></div></div>' +
-      '<button class="btn ghost" id="lvAdd">' + (LV.ed >= 0 ? "Update line" : "+ Add line") + "</button>" + (LV.ed >= 0 ? '<button class="btn ghost" id="lvCancel">Cancel</button>' : "") + "</div>" +
+      '<button class="btn ghost" id="lvAdd">' + (LV.ed >= 0 ? "✓ Update this line" : "+ Add another line") + "</button>" + (LV.ed >= 0 ? '<button class="btn ghost" id="lvCancel">Cancel</button>' : "") + "</div>" +
       '<button class="btn ghost media" id="lvMedia">📷 Photo or video for the team</button>' +
       '<button class="btn" id="lvSave">' + (sav ? "Save changes" : "Save Available Livestock") + " · " + LV.rows.length + " line" + (LV.rows.length === 1 ? "" : "s") + "</button>";
     var el = screen("lv", h);
@@ -1793,19 +1798,26 @@ var XL = (function () {
     onChip(el, "sp", function (v) { keep(); F.sp = v; lvDraw(); });
     onChip(el, "sup", function (v) { keep(); var s = sups[+v]; F.sup = s[0]; F.plate = s[1]; F.org = s[2]; lvDraw(); });
     bindSteps(el, function (inp) { F.q = inp.value; });
-    onChip(el, "ed", function (v) { LV.ed = +v; LV.f = clone(LV.rows[+v]); lvDraw(); window.scrollTo(0, 9999); });
+    onChip(el, "ed", function (v) { if (LV.ed < 0 && !takeLine(true)) return; LV.ed = +v; LV.f = clone(LV.rows[+v]); lvDraw(); window.scrollTo(0, 9999); });
     onChip(el, "rm", function (v) { LV.rows.splice(+v, 1); LV.ed = -1; LV.f = lvBlank(); lvDraw(); });
     if ($("lvCancel")) $("lvCancel").onclick = function () { LV.ed = -1; LV.f = lvBlank(); lvDraw(); };
-    $("lvAdd").onclick = function () {
+    // the line being typed is taken in automatically: by "+ Add another line" or by Save
+    function takeLine(quiet) {
       keep();
       var l = { o: F.o, sp: F.sp, q: +F.q || 0, sup: F.sup.trim(), plate: F.plate.trim().toUpperCase(), org: F.org.trim() };
+      var touched = l.sp || l.q || (LV.ed >= 0);
+      if (!touched) return quiet ? true : (alertMsg("Tap the species and enter the heads."), false);
       var err = !l.sp ? "Tap the species." : !l.q ? "Enter the heads." : !l.sup ? "Enter the supplier." : !l.plate ? "Enter the plate number." : !l.org ? "Enter the origin (location)." : "";
-      if (err) return alertMsg(err);
+      if (err) { alertMsg(err); return false; }
       if (LV.ed >= 0) LV.rows[LV.ed] = l; else LV.rows.push(l);
-      LV.ed = -1; LV.f = lvBlank(); LV.f.sp = ""; lvDraw();
-    };
+      LV.ed = -1; LV.f = lvBlank(); LV.f.sp = ""; LV.f.q = "";
+      return true;
+    }
+    $("lvAdd").onclick = function () { if (takeLine(false)) lvDraw(); };
     $("lvSave").onclick = function () {
-      if (!LV.rows.length) return alertMsg("Add at least one line first.");
+      if (!takeLine(true)) return;
+      lvDraw();
+      if (!LV.rows.length) return alertMsg("Tap the species and enter the heads, supplier, plate and origin.");
       submit({ k: "lv", d: LV.d, rows: LV.rows }, "Save Available Livestock for " + dlabel(LV.d) + " (" + LV.rows.length + " lines)?");
     };
   }
@@ -1836,8 +1848,8 @@ var XL = (function () {
     });
     if (AM.rows.length) h += '<div class="hint">Total: inspected ' + fmt(tIns) + " · rejected " + fmt(tRej) + " · passed " + fmt(tIns - tRej) + "</div>";
     if (AM.add) h += '<div class="card" style="background:var(--bg);box-shadow:none;margin:12px 0"><div class="h">Animals not in the list</div>' +
-      ownerChips(AM.add.o, "ao") + chips("Species", X.sp, AM.add.sp, "asp") +
-      '<button class="btn ghost" id="amAddOk">Add to the list</button></div>';
+      ownerChips(AM.add.o, "ao") + chips("Species (tap to add)", X.sp, AM.add.sp, "asp") +
+      '<button class="btn ghost" id="amAddX">Close</button></div>';
     else h += '<button class="btn ghost" id="amAdd">+ Animals not in the list</button>';
     h += '<button class="btn ghost media" id="amMedia">📷 Photo or video for the team</button>';
     h += '<button class="btn" id="amSave">' + (sav ? "Save changes" : "Save Ante Mortem") + "</button>";
@@ -1850,12 +1862,11 @@ var XL = (function () {
     if ($("amAll")) $("amAll").onclick = function () { haptic(); AM.rows.forEach(function (r) { r.rej = 0; r.why = ""; }); amDraw(); };
     if ($("amAdd")) $("amAdd").onclick = function () { AM.add = { o: "Own", sp: "" }; amDraw(); window.scrollTo(0, 9999); };
     onChip(el, "ao", function (v) { AM.add.o = v; amDraw(); });
-    onChip(el, "asp", function (v) { AM.add.sp = v; amDraw(); });
-    if ($("amAddOk")) $("amAddOk").onclick = function () {
-      if (!AM.add.sp) return alertMsg("Tap the species.");
-      if (AM.rows.some(function (r) { return r.o === AM.add.o && r.sp === AM.add.sp; })) return alertMsg("That owner and species is already in the list.");
-      AM.rows.push({ o: AM.add.o, sp: AM.add.sp, ins: 0, rej: 0, why: "" }); AM.add = null; amDraw();
-    };
+    onChip(el, "asp", function (v) {          // tapping the species adds the line at once
+      if (AM.rows.some(function (r) { return r.o === AM.add.o && r.sp === v; })) return alertMsg("That owner and species is already in the list.");
+      AM.rows.push({ o: AM.add.o, sp: v, ins: 0, rej: 0, why: "" }); AM.add = null; amDraw();
+    });
+    if ($("amAddX")) $("amAddX").onclick = function () { AM.add = null; amDraw(); };
     $("amSave").onclick = function () {
       var rows = [], err = "";
       AM.rows.forEach(function (r) {
@@ -1906,8 +1917,8 @@ var XL = (function () {
     if (!S.rows.length) h += '<div class="empty">No lines yet.</div>';
     else h += '<div class="hint">Total: ' + fmt(tP) + " pcs · " + fmt(tK, 1) + " kg</div>";
     if (S.add) h += '<div class="card" style="background:var(--bg);box-shadow:none;margin:12px 0"><div class="h">Add a line</div>' +
-      ownerChips(S.add.o, "ao") + chips("Species", X.sp, S.add.sp, "asp") +
-      (S.add.o === "Own" ? chips("Channel", X.ch, S.add.ch, "ach", "sm") : "") + '<button class="btn ghost" id="addOk">Add the line</button></div>';
+      ownerChips(S.add.o, "ao") + (S.add.o === "Own" ? chips("Channel", X.ch, S.add.ch, "ach", "sm") : "") + chips("Species (tap to add)", X.sp, S.add.sp, "asp") +
+      '<button class="btn ghost" id="addX">Close</button></div>';
     else h += '<button class="btn ghost" id="addLine">+ Add a line</button>';
     h += '<button class="btn" id="save">' + (sav ? "Save changes" : isOrder ? "Save Production Order" : "Save Production Actual") + "</button>";
     var el = screen(S.kind, h);
@@ -1932,14 +1943,13 @@ var XL = (function () {
     });
     if ($("addLine")) $("addLine").onclick = function () { S.add = { o: "Own", sp: "", ch: "Export" }; lineDraw(S); window.scrollTo(0, 9999); };
     onChip(el, "ao", function (v) { S.add.o = v; S.add.ch = v === "Own" ? "Export" : v; lineDraw(S); });
-    onChip(el, "asp", function (v) { S.add.sp = v; lineDraw(S); });
-    onChip(el, "ach", function (v) { S.add.ch = v; lineDraw(S); });
-    if ($("addOk")) $("addOk").onclick = function () {
-      if (!S.add.sp) return alertMsg("Tap the species.");
+    onChip(el, "asp", function (v) {          // tapping the species adds the line at once
       var ch = S.add.o === "Own" ? S.add.ch : S.add.o;
-      if (S.rows.some(function (r) { return r.o === S.add.o && r.sp === S.add.sp && (r.ch || r.o) === ch; })) return alertMsg("That line is already in the list.");
-      S.rows.push({ o: S.add.o, sp: S.add.sp, ch: ch, pcs: 0, kg: 0, auto: true }); S.add = null; lineDraw(S);
-    };
+      if (S.rows.some(function (r) { return r.o === S.add.o && r.sp === v && (r.ch || r.o) === ch; })) return alertMsg("That line is already in the list.");
+      S.rows.push({ o: S.add.o, sp: v, ch: ch, pcs: 0, kg: 0, auto: true }); S.add = null; lineDraw(S);
+    });
+    onChip(el, "ach", function (v) { S.add.ch = v; lineDraw(S); });
+    if ($("addX")) $("addX").onclick = function () { S.add = null; lineDraw(S); };
     $("save").onclick = function () {
       var rows = [], err = "";
       S.rows.forEach(function (r) {
@@ -2363,6 +2373,103 @@ var XL = (function () {
     inp.click();
   }
 
+  // ---------------- the shareable plan: a clean table picture, or tidy plain text
+  function shareBlob(blob, name) {
+    if (window.LunaApp) { b64of(blob).then(function (b) { window.LunaApp.shareFile(b, name, blob.type); }); return; }
+    var file = null; try { file = new File([blob], name, { type: blob.type }); } catch (e) {}
+    if (file && navigator.canShare && navigator.canShare({ files: [file] })) return navigator.share({ files: [file], title: name }).catch(function () {});
+    var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name; document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+  }
+  function planDays() {
+    var out = [];
+    (X.rep || []).forEach(function (day, i) {
+      var flags = X.st[day[0]] || [0, 0, 0, 0, 0];
+      if (i === 0 || day[1].length) out.push({ d: day[0], rows: day[1], al: day[2] || [], flags: flags });
+    });
+    return out;
+  }
+  function plainPlan() {
+    var L1 = ["LIVESTOCK & SLAUGHTER PLAN", L.dLong(X.t) + ", " + X.hm, ""];
+    planDays().forEach(function (p) {
+      L1.push("SLAUGHTER DAY " + L.dShort(p.d).toUpperCase() + " (" + stage(p.flags)[0] + ")");
+      if (!p.rows.length) L1.push("Nothing entered yet.");
+      p.rows.forEach(function (r) { L1.push("- " + (r[0] === "Own" ? "Own" : r[0]) + ", " + r[1] + ": available " + nz(r[2]) + ", passed " + nz(r[3]) + ", ordered " + nz(r[5]) + ", produced " + nz(r[6]) + (r[7] ? ", " + fmt(r[7], 1) + " kg" : "")); });
+      p.al.forEach(function (a) { L1.push((a[0] === "r" ? "! " : "* ") + a[1]); });
+      L1.push("");
+    });
+    var st = X.stock && X.stock.now || {}, ks = Object.keys(st).filter(function (k) { return st[k][0] || st[k][1]; });
+    if (ks.length) { L1.push("CARCASS STOCK"); ks.forEach(function (k) { L1.push("- " + k + ": " + fmt(st[k][0]) + " pcs, " + fmt(st[k][1], 1) + " kg"); }); }
+    return L1.join("\n").trim();
+  }
+  function planPicture() {
+    return new Promise(function (resolve) {
+      var W = 1080, P = 48, days = planDays(), st = X.stock && X.stock.now || {}, sks = Object.keys(st).filter(function (k) { return st[k][0] || st[k][1]; });
+      var rowH = 58, H = 300;
+      days.forEach(function (p) { H += 150 + Math.max(1, p.rows.length + 1) * rowH + p.al.length * 46 + 30; });
+      if (sks.length) H += 130 + (sks.length + 1) * rowH;
+      H += 110;
+      var c = document.createElement("canvas"); c.width = W; c.height = H;
+      var g = c.getContext("2d"), F = "-apple-system, Roboto, 'Segoe UI', Arial, sans-serif";
+      var txt = function (t, x, y, size, weight, color, align) { g.font = (weight || 400) + " " + size + "px " + F; g.fillStyle = color || "#1c2730"; g.textAlign = align || "left"; g.fillText(t, x, y); };
+      var rr = function (x, y, w, h, r, fill) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); g.fillStyle = fill; g.fill(); };
+      g.fillStyle = "#ffffff"; g.fillRect(0, 0, W, H);
+      ["#e6332a", "#f39200", "#3daa35", "#0076a8"].forEach(function (col, i) { g.fillStyle = col; g.fillRect(i * W / 4, 0, W / 4, 12); });
+      var logo = new Image();
+      logo.onload = logo.onerror = function () {
+        try { if (logo.width) g.drawImage(logo, P, 44, 60 * logo.width / logo.height, 60); } catch (e) {}
+        txt("SLAUGHTER PLAN", W - P, 70, 22, 800, "#e6332a", "right");
+        txt(L.dLong(X.t) + " · " + (X.hm || ""), W - P, 102, 22, 600, "#6e8592", "right");
+        txt("Livestock & Slaughter Plan", P, 186, 48, 800);
+        var y = 236;
+        var cols = [["Owner", 0, "left"], ["Species", 190, "left"], ["Available", 485, "right"], ["Passed", 600, "right"], ["Ordered", 720, "right"], ["Produced", 850, "right"], ["Kg", W - 2 * P - 18, "right"]];
+        days.forEach(function (p) {
+          var sg = stage(p.flags);
+          rr(P, y, W - 2 * P, 70, 18, "#1c2730");
+          txt("Slaughter day  " + L.dShort(p.d), P + 26, y + 46, 30, 800, "#ffffff");
+          var pc = { wait: ["#e9edf0", "#5d6c76"], blue: ["#dcefff", "#0b5cad"], amber: ["#ffeccc", "#b86b00"], green: ["#dcf3e0", "#23843a"] }[sg[1]];
+          g.font = "800 22px " + F; var pw = g.measureText(sg[0]).width + 34;
+          rr(W - P - 22 - pw, y + 17, pw, 38, 19, pc[0]); txt(sg[0], W - P - 22 - pw / 2, y + 44, 22, 800, pc[1], "center");
+          y += 90;
+          // the five steps
+          STAGES.forEach(function (s, i) { var x = P + i * (W - 2 * P) / 5; g.beginPath(); g.arc(x + 14, y + 4, 11, 0, 2 * Math.PI); g.fillStyle = p.flags[i] ? "#23943a" : "#d9dfe3"; g.fill(); txt(s, x + 32, y + 12, 21, 700, p.flags[i] ? "#23843a" : "#95a2ab"); });
+          y += 40;
+          rr(P, y, W - 2 * P, rowH, 12, "#f4f5f7");
+          cols.forEach(function (cl) { txt(cl[0].toUpperCase(), P + 18 + (cl[2] === "right" ? cl[1] - 18 : cl[1]), y + 37, 19, 800, "#6e8592", cl[2]); });
+          y += rowH;
+          if (!p.rows.length) { txt("Nothing entered yet.", P + 18, y + 38, 24, 500, "#95a2ab"); y += rowH; }
+          var T = [0, 0, 0, 0, 0];
+          p.rows.forEach(function (r, i) {
+            if (i % 2) { g.fillStyle = "#fafbfc"; g.fillRect(P, y, W - 2 * P, rowH); }
+            g.fillStyle = "#eceff1"; g.fillRect(P, y + rowH - 2, W - 2 * P, 2);
+            var vals = [r[0] === "Own" ? "Own" : r[0], (SPI[r[1]] || "") + " " + r[1], nz(r[2]), nz(r[3]), nz(r[5]), nz(r[6]), r[7] ? fmt(r[7], 1) : "-"];
+            [r[2], r[3], r[5], r[6], r[7]].forEach(function (v, k) { T[k] += v || 0; });
+            cols.forEach(function (cl, k) { txt(vals[k], P + 18 + (cl[2] === "right" ? cl[1] - 18 : cl[1]), y + 38, 25, k === 0 ? 800 : k === 5 ? 800 : 500, k === 0 ? (r[0] === "Own" ? "#e6332a" : "#0076a8") : "#1c2730", cl[2]); });
+            y += rowH;
+          });
+          if (p.rows.length > 1) {
+            g.fillStyle = "#1c2730"; g.fillRect(P, y, W - 2 * P, 3);
+            txt("Total", P + 18, y + 40, 25, 800);
+            [nz(T[0]), nz(T[1]), nz(T[2]), nz(T[3]), T[4] ? fmt(T[4], 1) : "-"].forEach(function (v, k) { var cl = cols[k + 2]; txt(v, P + cl[1], y + 40, 25, 800, "#1c2730", "right"); });
+            y += rowH;
+          }
+          y += 8;
+          p.al.forEach(function (a) { g.beginPath(); g.arc(P + 12, y + 22, 8, 0, 2 * Math.PI); g.fillStyle = a[0] === "r" ? "#e6332a" : "#f39200"; g.fill(); txt(a[1].length > 70 ? a[1].slice(0, 69) + "…" : a[1], P + 32, y + 30, 23, 600, a[0] === "r" ? "#c81e17" : "#b86b00"); y += 46; });
+          y += 30;
+        });
+        if (sks.length) {
+          rr(P, y, W - 2 * P, 70, 18, "#0e7c80"); txt("Carcass stock now", P + 26, y + 46, 30, 800, "#ffffff"); y += 90;
+          rr(P, y, W - 2 * P, rowH, 12, "#f4f5f7"); txt("SPECIES", P + 18, y + 37, 19, 800, "#6e8592"); txt("PIECES", 700, y + 37, 19, 800, "#6e8592", "right"); txt("KG", W - P - 18, y + 37, 19, 800, "#6e8592", "right"); y += rowH;
+          sks.forEach(function (k) { g.fillStyle = "#eceff1"; g.fillRect(P, y + rowH - 2, W - 2 * P, 2); txt((SPI[k] || "") + " " + k, P + 18, y + 38, 25, 700); txt(fmt(st[k][0]), 700, y + 38, 25, 800, "#1c2730", "right"); txt(fmt(st[k][1], 1), W - P - 18, y + 38, 25, 800, "#1c2730", "right"); y += rowH; });
+          y += 20;
+        }
+        txt("Avl = available the day before · Pass = passed ante mortem · Kg = carcass kg produced", P, H - 64, 19, 500, "#95a2ab");
+        txt("Luna · " + FOOTER, P, H - 32, 19, 600, "#95a2ab");
+        c.toBlob(function (b) { resolve(b); }, "image/png");
+      };
+      logo.src = LOGO;
+    });
+  }
+
 
   // ================================================================ ADMIN: cut-off, reopen for the team, erase, activity
   var ADM = null, AE = { kinds: [], d1: "", d2: "" }, AR = { k: "all", d: "", days: "1" };
@@ -2433,7 +2540,7 @@ var XL = (function () {
   // ================================================================ go
   if ("serviceWorker" in navigator && location.protocol === "https:") navigator.serviceWorker.register("sw.js").catch(function () {});
   start();
-  window.__app = { get X() { return X; }, show: show };
+  window.__app = { get X() { return X; }, show: show, pic: function () { return planPicture(); }, plain: function () { return plainPlan(); } };
 })();
 </script>
 </body>
