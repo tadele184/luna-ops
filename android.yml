@@ -1,0 +1,760 @@
+# Builds the LUNA Slaughterhouse Android app (APK) and publishes it as a download.
+# It runs by itself on every upload to the repository, or from the Actions tab: "Build Android app" > Run workflow.
+# Download link after it finishes: https://github.com/tadele184/luna-ops/releases/download/app/LUNA-Ops.apk
+name: Build Android app
+
+on: [push, workflow_dispatch]
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Write the app source
+        run: |
+          mkdir -p app/res/drawable app/src/com/luna/ops
+          cp icon-512.png app/res/drawable/icon.png
+          cat > app/AndroidManifest.xml <<'XEOF'
+          <?xml version="1.0" encoding="utf-8"?>
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.luna.ops">
+              <uses-permission android:name="android.permission.INTERNET" />
+              <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+              <uses-permission android:name="android.permission.RECORD_AUDIO" />
+              <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
+              <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+              <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+              <uses-permission android:name="android.permission.FOREGROUND_SERVICE_REMOTE_MESSAGING" />
+              <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+              <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+              <uses-permission android:name="android.permission.VIBRATE" />
+              <uses-permission android:name="android.permission.WAKE_LOCK" />
+              <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+              <application android:label="Luna" android:icon="@drawable/icon" android:allowBackup="true"
+                  android:usesCleartextTraffic="false" android:theme="@android:style/Theme.Material.Light.NoActionBar">
+                  <activity android:name=".MainActivity" android:exported="true" android:launchMode="singleTask"
+                      android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize"
+                      android:windowSoftInputMode="adjustResize">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+                  <service android:name=".Live" android:exported="false" android:foregroundServiceType="remoteMessaging" />
+                  <receiver android:name=".Act" android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.BOOT_COMPLETED" />
+                          <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                      </intent-filter>
+                  </receiver>
+                  <provider android:name=".Files" android:authorities="com.luna.ops.files" android:exported="false" android:grantUriPermissions="true" />
+              </application>
+          </manifest>
+          XEOF
+          cat > app/res/drawable/ic_note.xml <<'XEOF'
+          <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+              <path android:fillColor="#FFFFFFFF" android:pathData="M20,2H4C2.9,2 2,2.9 2,4v18l4,-4h14c1.1,0 2,-0.9 2,-2V4C22,2.9 21.1,2 20,2z" />
+          </vector>
+          XEOF
+          cat > app/res/drawable/ic_call.xml <<'XEOF'
+          <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+              <path android:fillColor="#FFFFFFFF" android:pathData="M6.62,10.79c1.44,2.83 3.76,5.14 6.59,6.59l2.2,-2.2c0.27,-0.27 0.67,-0.36 1.02,-0.24c1.12,0.37 2.33,0.57 3.57,0.57c0.55,0 1,0.45 1,1V20c0,0.55 -0.45,1 -1,1C10.61,21 3,13.39 3,4c0,-0.55 0.45,-1 1,-1h3.5c0.55,0 1,0.45 1,1c0,1.25 0.2,2.45 0.57,3.57c0.11,0.35 0.03,0.74 -0.25,1.02L6.62,10.79z" />
+          </vector>
+          XEOF
+          cat > app/res/drawable/ic_end.xml <<'XEOF'
+          <vector xmlns:android="http://schemas.android.com/apk/res/android" android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+              <path android:fillColor="#FFFFFFFF" android:pathData="M19,6.41L17.59,5 12,10.59 6.41,5 5,6.41 10.59,12 5,17.59 6.41,19 12,13.41 17.59,19 19,17.59 13.41,12z" />
+          </vector>
+          XEOF
+          cat > app/src/com/luna/ops/MainActivity.java <<'XEOF'
+          package com.luna.ops;
+
+          import android.app.Activity;
+          import android.Manifest;
+          import android.content.ContentValues;
+          import android.content.pm.PackageManager;
+          import android.content.Intent;
+          import android.net.Uri;
+          import android.os.Build;
+          import android.os.Bundle;
+          import android.os.Environment;
+          import android.provider.MediaStore;
+          import android.util.Base64;
+          import android.view.View;
+          import android.webkit.JavascriptInterface;
+          import android.webkit.PermissionRequest;
+          import android.webkit.ValueCallback;
+          import android.webkit.WebChromeClient;
+          import android.webkit.WebResourceRequest;
+          import android.webkit.WebSettings;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          import android.app.NotificationManager;
+          import android.content.SharedPreferences;
+          import android.media.AudioManager;
+          import android.os.PowerManager;
+          import android.provider.Settings;
+          import android.view.WindowManager;
+          import android.widget.Toast;
+
+          import java.io.File;
+          import java.io.FileOutputStream;
+          import java.io.OutputStream;
+
+          /** LUNA: the web app in a full-screen window, with voice notes, photos, videos and the Excel reports. */
+          public class MainActivity extends Activity {
+              static final String HOME = "https://tadele184.github.io/luna-ops/";
+              WebView web;
+              ValueCallback<Uri[]> pickCallback;
+              Uri captureUri;
+              PermissionRequest pendingMic;
+              static final int PICK = 7, MIC = 8, NOTE = 9;
+              static volatile boolean visible = false;
+              boolean loaded = false, inCall = false;
+              String pendingJs = null;
+
+              @Override
+              protected void onCreate(Bundle state) {
+                  super.onCreate(state);
+                  getWindow().setStatusBarColor(0xFFFFFFFF);
+                  if (Build.VERSION.SDK_INT >= 23) getWindow().getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
+                  web = new WebView(this);
+                  setContentView(web);
+                  WebSettings s = web.getSettings();
+                  s.setJavaScriptEnabled(true);
+                  s.setDomStorageEnabled(true);
+                  s.setDatabaseEnabled(true);
+                  s.setUserAgentString(s.getUserAgentString() + " LunaOpsApp/1");
+                  web.addJavascriptInterface(new Bridge(), "LunaApp");
+                  s.setMediaPlaybackRequiresUserGesture(false);
+                  web.setWebChromeClient(new WebChromeClient() {
+                      // the microphone, for voice notes
+                      @Override
+                      public void onPermissionRequest(final PermissionRequest request) {
+                          runOnUiThread(new Runnable() {
+                              public void run() {
+                                  boolean audio = false;
+                                  for (String r : request.getResources()) if (PermissionRequest.RESOURCE_AUDIO_CAPTURE.equals(r)) audio = true;
+                                  if (!audio) { request.deny(); return; }
+                                  if (checkSelfPermission(Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED) {
+                                      request.grant(new String[] { PermissionRequest.RESOURCE_AUDIO_CAPTURE });
+                                  } else {
+                                      pendingMic = request;
+                                      requestPermissions(new String[] { Manifest.permission.RECORD_AUDIO }, MIC);
+                                  }
+                              }
+                          });
+                      }
+
+                      // photos and videos: the camera or the gallery
+                      @Override
+                      public boolean onShowFileChooser(WebView view, ValueCallback<Uri[]> callback, FileChooserParams params) {
+                          if (pickCallback != null) pickCallback.onReceiveValue(null);
+                          pickCallback = callback;
+                          String accept = "";
+                          for (String a : params.getAcceptTypes()) accept += a + ",";
+                          java.util.ArrayList<Intent> cams = new java.util.ArrayList<Intent>();
+                          long t = System.currentTimeMillis();
+                          if (accept.contains("image") || accept.equals(",")) {
+                              Intent cam = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                              captureUri = Uri.parse("content://com.luna.ops.files/capture_" + t + ".jpg");
+                              cam.putExtra(MediaStore.EXTRA_OUTPUT, captureUri);
+                              cam.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                              cams.add(cam);
+                          }
+                          if (accept.contains("video")) {
+                              Intent vid = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+                              vid.putExtra(MediaStore.EXTRA_DURATION_LIMIT, 30);
+                              vid.putExtra(MediaStore.EXTRA_VIDEO_QUALITY, 0);
+                              cams.add(vid);
+                          }
+                          Intent pick = new Intent(Intent.ACTION_GET_CONTENT);
+                          pick.addCategory(Intent.CATEGORY_OPENABLE);
+                          pick.setType(accept.contains("video") && !accept.contains("image") ? "video/*" : accept.contains("image") && !accept.contains("video") ? "image/*" : "*/*");
+                          Intent chooser = Intent.createChooser(pick, "Take or choose");
+                          chooser.putExtra(Intent.EXTRA_INITIAL_INTENTS, cams.toArray(new android.os.Parcelable[0]));
+                          try { startActivityForResult(chooser, PICK); } catch (Exception e) { pickCallback = null; return false; }
+                          return true;
+                      }
+                  });
+                  web.setWebViewClient(new WebViewClient() {
+                      @Override
+                      public void onPageFinished(WebView view, String url) {
+                          loaded = true;
+                          if (pendingJs != null) { final String c = pendingJs; pendingJs = null; web.postDelayed(new Runnable() { public void run() { web.evaluateJavascript(c, null); } }, 1200); }
+                      }
+
+                      @Override
+                      public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+                          Uri u = request.getUrl();
+                          String host = u.getHost();
+                          if (host != null && host.endsWith("github.io")) return false;
+                          try { startActivity(new Intent(Intent.ACTION_VIEW, u)); } catch (Exception e) { /* no app for it */ }
+                          return true;
+                      }
+                  });
+                  if (state != null) web.restoreState(state);
+                  else web.loadUrl(HOME);
+                  handle(getIntent());
+              }
+
+              @Override
+              protected void onNewIntent(Intent i) {
+                  super.onNewIntent(i);
+                  setIntent(i);
+                  handle(i);
+              }
+
+              @Override
+              protected void onResume() { super.onResume(); visible = true; }
+
+              @Override
+              protected void onPause() { super.onPause(); visible = false; }
+
+              /** Opened from a notification: an incoming call (show or answer) or a new message. */
+              void handle(Intent i) {
+                  if (i == null) return;
+                  String call = i.getStringExtra("call"), go = i.getStringExtra("go");
+                  if (call != null) {
+                      ((NotificationManager) getSystemService(NOTIFICATION_SERVICE)).cancel(Live.callNote(call));
+                      if (Build.VERSION.SDK_INT >= 27) { setShowWhenLocked(true); setTurnScreenOn(true); }
+                      else getWindow().addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+                      String act = i.getStringExtra("act");
+                      js("window.lunaCall && lunaCall('" + call.replaceAll("[^\\w-]", "") + "','" + ("answer".equals(act) ? "answer" : "show") + "')");
+                  } else if (go != null) {
+                      js("window.lunaGo && lunaGo('team')");
+                  }
+                  i.removeExtra("call"); i.removeExtra("go");
+              }
+
+              void js(String code) {
+                  if (loaded) web.evaluateJavascript(code, null);
+                  else pendingJs = code;
+              }
+
+              @Override
+              public void onRequestPermissionsResult(int code, String[] perms, int[] results) {
+                  if (code == NOTE) { askBattery(); return; }
+                  if (code == MIC && pendingMic != null) {
+                      if (results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED) pendingMic.grant(new String[] { PermissionRequest.RESOURCE_AUDIO_CAPTURE });
+                      else pendingMic.deny();
+                      pendingMic = null;
+                  }
+              }
+
+              @Override
+              protected void onActivityResult(int code, int result, Intent data) {
+                  super.onActivityResult(code, result, data);
+                  if (code != PICK || pickCallback == null) return;
+                  Uri[] out = null;
+                  if (result == RESULT_OK) {
+                      if (data != null && data.getData() != null) out = new Uri[] { data.getData() };
+                      else if (captureUri != null && Files.size(this, captureUri) > 0) out = new Uri[] { captureUri };
+                  }
+                  pickCallback.onReceiveValue(out);
+                  pickCallback = null;
+              }
+
+              @Override
+              protected void onSaveInstanceState(Bundle out) {
+                  super.onSaveInstanceState(out);
+                  web.saveState(out);
+              }
+
+              @Override
+              public void onBackPressed() {
+                  if (web.canGoBack()) web.goBack();
+                  else super.onBackPressed();
+              }
+
+              /** Writes the file to the app's share folder and returns a content:// link to it. */
+              Uri shareable(byte[] data, String name) throws Exception {
+                  File dir = new File(getCacheDir(), "share");
+                  dir.mkdirs();
+                  File f = new File(dir, name);
+                  FileOutputStream o = new FileOutputStream(f);
+                  o.write(data);
+                  o.close();
+                  return Uri.parse("content://com.luna.ops.files/" + Uri.encode(name));
+              }
+
+              void save(String b64, String name, String mime, boolean share) {
+                  try {
+                      byte[] data = Base64.decode(b64, Base64.DEFAULT);
+                      if (share) {
+                          Uri u = shareable(data, name);
+                          Intent i = new Intent(Intent.ACTION_SEND);
+                          i.setType(mime);
+                          i.putExtra(Intent.EXTRA_STREAM, u);
+                          i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                          startActivity(Intent.createChooser(i, "Share " + name));
+                          return;
+                      }
+                      if (Build.VERSION.SDK_INT >= 29) {
+                          ContentValues v = new ContentValues();
+                          v.put(MediaStore.MediaColumns.DISPLAY_NAME, name);
+                          v.put(MediaStore.MediaColumns.MIME_TYPE, mime);
+                          v.put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOWNLOADS + "/LUNA Ops");
+                          Uri u = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, v);
+                          OutputStream o = getContentResolver().openOutputStream(u);
+                          o.write(data);
+                          o.close();
+                          Toast.makeText(this, "Saved in Downloads / LUNA Ops", Toast.LENGTH_LONG).show();
+                          open(u, mime);
+                      } else {
+                          Uri u = shareable(data, name);
+                          open(u, mime);
+                      }
+                  } catch (Exception e) {
+                      Toast.makeText(this, "Could not save the file: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                  }
+              }
+
+              void open(Uri u, String mime) {
+                  Intent i = new Intent(Intent.ACTION_VIEW);
+                  i.setDataAndType(u, mime);
+                  i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                  try { startActivity(Intent.createChooser(i, "Open with")); } catch (Exception e) { /* no spreadsheet app */ }
+              }
+
+              /** Calls: the earpiece (or the loudspeaker) and the screen stays on. */
+              void audio(boolean on, boolean speaker) {
+                  AudioManager am = (AudioManager) getSystemService(AUDIO_SERVICE);
+                  inCall = on;
+                  if (on) {
+                      am.setMode(AudioManager.MODE_IN_COMMUNICATION);
+                      am.setSpeakerphoneOn(speaker);
+                      getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                  } else {
+                      am.setSpeakerphoneOn(false);
+                      am.setMode(AudioManager.MODE_NORMAL);
+                      getWindow().clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
+                  }
+              }
+
+              /** Saves the person's channel and starts (or stops) the background service that rings and notifies. */
+              void push(String db, String key, String user, String name) {
+                  SharedPreferences p = getSharedPreferences("luna", MODE_PRIVATE);
+                  boolean same = db.equals(p.getString("db", "")) && key.equals(p.getString("key", ""));
+                  p.edit().putString("db", db).putString("key", key).putString("user", user).putString("name", name).apply();
+                  if (db.length() == 0 || key.length() == 0) { stopService(new Intent(this, Live.class)); return; }
+                  Intent s = new Intent(this, Live.class);
+                  if (!same) s.putExtra("restart", true);
+                  try { if (Build.VERSION.SDK_INT >= 26) startForegroundService(s); else startService(s); } catch (Exception e) { /* started again next time */ }
+                  if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission("android.permission.POST_NOTIFICATIONS") != PackageManager.PERMISSION_GRANTED)
+                      requestPermissions(new String[] { "android.permission.POST_NOTIFICATIONS" }, NOTE);
+                  else askBattery();
+              }
+
+              /** Asks once to let Luna run in the background, so calls ring when the phone sleeps. */
+              void askBattery() {
+                  SharedPreferences p = getSharedPreferences("luna", MODE_PRIVATE);
+                  if (p.getBoolean("askedBattery", false)) return;
+                  p.edit().putBoolean("askedBattery", true).apply();
+                  PowerManager pm = (PowerManager) getSystemService(POWER_SERVICE);
+                  if (pm.isIgnoringBatteryOptimizations(getPackageName())) return;
+                  try { startActivity(new Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:" + getPackageName()))); } catch (Exception e) { /* not offered on this phone */ }
+              }
+
+              /** Called from the web app (window.LunaApp). */
+              class Bridge {
+                  @JavascriptInterface
+                  public void setPush(final String db, final String key, final String user, final String name) {
+                      runOnUiThread(new Runnable() { public void run() { push(db == null ? "" : db, key == null ? "" : key, user == null ? "" : user, name == null ? "" : name); } });
+                  }
+
+                  @JavascriptInterface
+                  public void callAudio(final boolean on, final boolean speaker) {
+                      runOnUiThread(new Runnable() { public void run() { audio(on, speaker); } });
+                  }
+
+                  @JavascriptInterface
+                  public boolean visible() { return visible; }
+
+                  @JavascriptInterface
+                  public void saveFile(final String b64, final String name, final String mime) {
+                      runOnUiThread(new Runnable() { public void run() { save(b64, name, mime, false); } });
+                  }
+
+                  @JavascriptInterface
+                  public void shareFile(final String b64, final String name, final String mime) {
+                      runOnUiThread(new Runnable() { public void run() { save(b64, name, mime, true); } });
+                  }
+
+                  @JavascriptInterface
+                  public void shareText(final String text) {
+                      runOnUiThread(new Runnable() {
+                          public void run() {
+                              Intent i = new Intent(Intent.ACTION_SEND);
+                              i.setType("text/plain");
+                              i.putExtra(Intent.EXTRA_TEXT, text);
+                              startActivity(Intent.createChooser(i, "Share the plan"));
+                          }
+                      });
+                  }
+              }
+          }
+          XEOF
+          cat > app/src/com/luna/ops/Files.java <<'XEOF'
+          package com.luna.ops;
+
+          import android.content.ContentProvider;
+          import android.content.ContentValues;
+          import android.database.Cursor;
+          import android.database.MatrixCursor;
+          import android.net.Uri;
+          import android.os.ParcelFileDescriptor;
+          import android.provider.OpenableColumns;
+
+          import java.io.File;
+          import java.io.FileNotFoundException;
+
+          /** Hands the saved report to WhatsApp, Telegram, email or a spreadsheet app. */
+          public class Files extends ContentProvider {
+              static File file(android.content.Context c, Uri uri) {
+                  File dir = new File(c.getCacheDir(), "share");
+                  dir.mkdirs();
+                  return new File(dir, new File(uri.getLastPathSegment()).getName());
+              }
+              File file(Uri uri) { return file(getContext(), uri); }
+              static long size(android.content.Context c, Uri uri) { return file(c, uri).length(); }
+
+              @Override public boolean onCreate() { return true; }
+
+              @Override
+              public ParcelFileDescriptor openFile(Uri uri, String mode) throws FileNotFoundException {
+                  if (mode != null && mode.contains("w"))      // the camera app writes the photo here
+                      return ParcelFileDescriptor.open(file(uri), ParcelFileDescriptor.MODE_READ_WRITE | ParcelFileDescriptor.MODE_CREATE | ParcelFileDescriptor.MODE_TRUNCATE);
+                  return ParcelFileDescriptor.open(file(uri), ParcelFileDescriptor.MODE_READ_ONLY);
+              }
+
+              @Override
+              public String getType(Uri uri) {
+                  String n = uri.getLastPathSegment();
+                  if (n != null && n.endsWith(".xlsx")) return "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                  if (n != null && n.endsWith(".jpg")) return "image/jpeg";
+                  return "application/octet-stream";
+              }
+
+              @Override
+              public Cursor query(Uri uri, String[] projection, String selection, String[] args, String sort) {
+                  File f = file(uri);
+                  MatrixCursor c = new MatrixCursor(new String[] { OpenableColumns.DISPLAY_NAME, OpenableColumns.SIZE });
+                  c.addRow(new Object[] { f.getName(), Long.valueOf(f.length()) });
+                  return c;
+              }
+
+              @Override public Uri insert(Uri uri, ContentValues values) { return null; }
+              @Override public int delete(Uri uri, String selection, String[] args) { return 0; }
+              @Override public int update(Uri uri, ContentValues values, String selection, String[] args) { return 0; }
+          }
+          XEOF
+          cat > app/src/com/luna/ops/Live.java <<'XEOF'
+          package com.luna.ops;
+
+          import android.app.Notification;
+          import android.app.NotificationChannel;
+          import android.app.NotificationManager;
+          import android.app.PendingIntent;
+          import android.app.Service;
+          import android.content.Context;
+          import android.content.Intent;
+          import android.content.SharedPreferences;
+          import android.media.AudioAttributes;
+          import android.media.RingtoneManager;
+          import android.net.Uri;
+          import android.os.Build;
+          import android.os.IBinder;
+
+          import org.json.JSONObject;
+
+          import java.io.BufferedReader;
+          import java.io.InputStreamReader;
+          import java.io.OutputStream;
+          import java.net.HttpURLConnection;
+          import java.net.URL;
+          import java.util.Iterator;
+
+          /**
+           * Keeps one quiet connection to the person's Luna inbox (Firebase), so a call rings and a message shows a
+           * notification even when Luna is closed. When Luna is on the screen, the app itself shows them.
+           */
+          public class Live extends Service {
+              static final int SERVICE_NOTE = 1;
+              volatile boolean stop = false;
+              Thread thread;
+              HttpURLConnection conn;
+
+              static int callNote(String id) { return 1000 + (id.hashCode() & 0xffff); }
+
+              static SharedPreferences prefs(Context c) { return c.getSharedPreferences("luna", MODE_PRIVATE); }
+
+              static void channels(Context c) {
+                  if (Build.VERSION.SDK_INT < 26) return;
+                  NotificationManager nm = (NotificationManager) c.getSystemService(NOTIFICATION_SERVICE);
+                  NotificationChannel calls = new NotificationChannel("calls", "Calls", NotificationManager.IMPORTANCE_HIGH);
+                  calls.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE),
+                      new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_NOTIFICATION_RINGTONE).setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build());
+                  calls.enableVibration(true);
+                  calls.setVibrationPattern(new long[] { 0, 800, 600, 800, 600 });
+                  calls.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
+                  nm.createNotificationChannel(calls);
+                  NotificationChannel msgs = new NotificationChannel("messages", "Team messages", NotificationManager.IMPORTANCE_HIGH);
+                  msgs.enableVibration(true);
+                  nm.createNotificationChannel(msgs);
+                  NotificationChannel live = new NotificationChannel("live", "Ready for calls", NotificationManager.IMPORTANCE_MIN);
+                  live.setShowBadge(false);
+                  nm.createNotificationChannel(live);
+              }
+
+              static Notification.Builder builder(Context c, String channel) {
+                  return Build.VERSION.SDK_INT >= 26 ? new Notification.Builder(c, channel) : new Notification.Builder(c);
+              }
+
+              static PendingIntent open(Context c, int code, String key, String value, String act) {
+                  Intent i = new Intent(c, MainActivity.class);
+                  i.putExtra(key, value);
+                  if (act != null) i.putExtra("act", act);
+                  i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                  return PendingIntent.getActivity(c, code, i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+              }
+
+              @Override
+              public void onCreate() {
+                  super.onCreate();
+                  channels(this);
+                  Notification n = builder(this, "live").setSmallIcon(R.drawable.ic_note).setContentTitle("Luna")
+                      .setContentText("Ready for calls and messages").setOngoing(true)
+                      .setContentIntent(open(this, 1, "go", "today", null)).build();
+                  if (Build.VERSION.SDK_INT >= 34) startForeground(SERVICE_NOTE, n, 512);       // FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING
+                  else startForeground(SERVICE_NOTE, n);
+              }
+
+              @Override
+              public int onStartCommand(Intent intent, int flags, int startId) {
+                  if (intent != null && intent.getBooleanExtra("restart", false) && conn != null) {
+                      try { conn.disconnect(); } catch (Exception e) { /* reconnects with the new channel */ }
+                  }
+                  if (thread == null || !thread.isAlive()) {
+                      stop = false;
+                      thread = new Thread(new Runnable() { public void run() { listen(); } });
+                      thread.start();
+                  }
+                  return START_STICKY;
+              }
+
+              @Override
+              public void onDestroy() {
+                  stop = true;
+                  try { if (conn != null) conn.disconnect(); } catch (Exception e) { /* closing */ }
+                  super.onDestroy();
+              }
+
+              @Override
+              public IBinder onBind(Intent intent) { return null; }
+
+              /** The inbox as a stream of events (Server-Sent Events). Reconnects by itself, waiting longer each time. */
+              void listen() {
+                  int wait = 2;
+                  while (!stop) {
+                      SharedPreferences p = prefs(this);
+                      String db = p.getString("db", ""), key = p.getString("key", "");
+                      if (db.length() == 0 || key.length() == 0) { stopSelf(); return; }
+                      try {
+                          HttpURLConnection c = (HttpURLConnection) new URL(db + "/inbox/" + key + ".json").openConnection();
+                          conn = c;
+                          c.setRequestProperty("Accept", "text/event-stream");
+                          c.setConnectTimeout(20000);
+                          c.setReadTimeout(90000);
+                          c.setInstanceFollowRedirects(true);
+                          BufferedReader r = new BufferedReader(new InputStreamReader(c.getInputStream(), "UTF-8"));
+                          String line, event = "";
+                          wait = 2;
+                          while (!stop && (line = r.readLine()) != null) {
+                              if (line.startsWith("event:")) event = line.substring(6).trim();
+                              else if (line.startsWith("data:") && ("put".equals(event) || "patch".equals(event))) {
+                                  try { got(db, key, new JSONObject(line.substring(5).trim())); } catch (Exception e) { /* not an inbox item */ }
+                              } else if ("cancel".equals(event) || "auth_revoked".equals(event)) break;
+                          }
+                          c.disconnect();
+                      } catch (Exception e) {
+                          /* no internet: try again below */
+                      }
+                      if (stop) return;
+                      try { Thread.sleep(wait * 1000L); } catch (InterruptedException e) { return; }
+                      wait = Math.min(60, wait * 2);
+                  }
+              }
+
+              void got(String db, String key, JSONObject m) throws Exception {
+                  String path = m.optString("path", "/");
+                  Object data = m.opt("data");
+                  if (!(data instanceof JSONObject)) return;
+                  JSONObject d = (JSONObject) data;
+                  String[] seg = path.replaceAll("^/+|/+$", "").split("/");
+                  if (path.equals("/") || seg[0].length() == 0) {
+                      Iterator<String> it = d.keys();
+                      while (it.hasNext()) { String k = it.next(); Object v = d.opt(k); if (v instanceof JSONObject) item(db, key, k, (JSONObject) v); }
+                  } else if (seg.length == 1) item(db, key, seg[0], d);
+              }
+
+              /** One note in the inbox: a message, a missed call or a call. Each is shown once. */
+              void item(String db, String key, String id, JSONObject it) {
+                  SharedPreferences p = prefs(this);
+                  String seen = p.getString("seen", "");
+                  if (seen.contains(id)) return;
+                  p.edit().putString("seen", (id + "," + seen).substring(0, Math.min(2000, id.length() + 1 + seen.length()))).apply();
+                  long age = System.currentTimeMillis() - it.optLong("at", System.currentTimeMillis());
+                  if (MainActivity.visible) return;                       // Luna is on the screen: it shows it itself
+                  http("DELETE", db + "/inbox/" + key + "/" + id + ".json", null);
+                  String t = it.optString("t"), from = it.optString("fromNm", "Luna");
+                  NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                  if ("msg".equals(t) || "missed".equals(t)) {
+                      if (age > 6 * 3600000L) return;
+                      String kind = it.optString("kind"), text = "missed".equals(t) ? "📞 Missed call" : "voice".equals(kind) ? "🎙️ Voice note" : "photo".equals(kind) ? "📷 Photo" : "video".equals(kind) ? "🎥 Video" : it.optString("text");
+                      Notification n = builder(this, "messages").setSmallIcon(R.drawable.ic_note).setContentTitle(from).setContentText(text)
+                          .setStyle(new Notification.BigTextStyle().bigText(text)).setAutoCancel(true).setCategory(Notification.CATEGORY_MESSAGE)
+                          .setContentIntent(open(this, 2, "go", "team", null)).build();
+                      nm.notify(2000 + (id.hashCode() & 0xffff), n);
+                  } else if ("call".equals(t)) {
+                      final String call = it.optString("id");
+                      if (call.length() == 0 || age > 120000) return;
+                      String state = http("GET", db + "/calls/" + call + "/info/state.json", null);
+                      if (state == null || !state.contains("ringing")) return;
+                      String to = it.optString("to"), toNm = it.optString("toNm");
+                      boolean group = "all".equals(to) || "managers".equals(to);
+                      Intent no = new Intent(this, Act.class);
+                      no.setAction("decline");
+                      no.putExtra("call", call);
+                      PendingIntent declinePi = PendingIntent.getBroadcast(this, callNote(call), no, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+                      PendingIntent show = open(this, callNote(call), "call", call, "show"), answer = open(this, callNote(call) + 1, "call", call, "answer");
+                      Notification.Builder b = builder(this, "calls").setSmallIcon(R.drawable.ic_call).setContentTitle(from)
+                          .setContentText(group ? "Luna group call · " + toNm : "Luna voice call").setCategory(Notification.CATEGORY_CALL)
+                          .setPriority(Notification.PRIORITY_MAX).setOngoing(true).setAutoCancel(false).setVisibility(Notification.VISIBILITY_PUBLIC)
+                          .setContentIntent(show).setFullScreenIntent(show, true)
+                          .addAction(new Notification.Action.Builder(R.drawable.ic_end, "Decline", declinePi).build())
+                          .addAction(new Notification.Action.Builder(R.drawable.ic_call, "Answer", answer).build());
+                      if (Build.VERSION.SDK_INT >= 26) b.setTimeoutAfter(45000);
+                      if (Build.VERSION.SDK_INT < 26) {
+                          b.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE));
+                          b.setVibrate(new long[] { 0, 800, 600, 800, 600 });
+                      }
+                      Notification n = b.build();
+                      n.flags |= Notification.FLAG_INSISTENT;
+                      nm.notify(callNote(call), n);
+                      watchCall(db, call);
+                  }
+              }
+
+              /** Stops the ringing when the caller hangs up or the call is answered on another phone. */
+              void watchCall(final String db, final String call) {
+                  final String me = prefs(this).getString("user", "");
+                  new Thread(new Runnable() {
+                      public void run() {
+                          NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+                          for (int i = 0; i < 16; i++) {
+                              try { Thread.sleep(3000); } catch (InterruptedException e) { return; }
+                              String s = http("GET", db + "/calls/" + call + "/info/state.json", null);
+                              String inCall = http("GET", db + "/calls/" + call + "/peers/" + me + ".json", null);
+                              boolean joined = inCall != null && !inCall.trim().equals("null");
+                              if (s == null || s.contains("ended") || s.trim().equals("null") || joined) { nm.cancel(callNote(call)); return; }
+                          }
+                          nm.cancel(callNote(call));
+                      }
+                  }).start();
+              }
+
+              /** A small request to the database. Returns the answer, or null without internet. */
+              static String http(String method, String url, String body) {
+                  try {
+                      HttpURLConnection c = (HttpURLConnection) new URL(url).openConnection();
+                      c.setRequestMethod(method);
+                      c.setConnectTimeout(15000);
+                      c.setReadTimeout(15000);
+                      if (body != null) {
+                          c.setDoOutput(true);
+                          OutputStream o = c.getOutputStream();
+                          o.write(body.getBytes("UTF-8"));
+                          o.close();
+                      }
+                      BufferedReader r = new BufferedReader(new InputStreamReader(c.getInputStream(), "UTF-8"));
+                      StringBuilder sb = new StringBuilder();
+                      String line;
+                      while ((line = r.readLine()) != null) sb.append(line);
+                      c.disconnect();
+                      return sb.toString();
+                  } catch (Exception e) {
+                      return null;
+                  }
+              }
+          }
+          XEOF
+          cat > app/src/com/luna/ops/Act.java <<'XEOF'
+          package com.luna.ops;
+
+          import android.app.NotificationManager;
+          import android.content.BroadcastReceiver;
+          import android.content.Context;
+          import android.content.Intent;
+          import android.content.SharedPreferences;
+          import android.os.Build;
+
+          /** "Decline" on the incoming call notification, and starting Luna's background service after the phone restarts. */
+          public class Act extends BroadcastReceiver {
+              @Override
+              public void onReceive(final Context c, Intent i) {
+                  final SharedPreferences p = Live.prefs(c);
+                  String a = i.getAction();
+                  if ("decline".equals(a)) {
+                      final String call = i.getStringExtra("call");
+                      if (call == null) return;
+                      ((NotificationManager) c.getSystemService(Context.NOTIFICATION_SERVICE)).cancel(Live.callNote(call));
+                      final PendingResult done = goAsync();
+                      new Thread(new Runnable() {
+                          public void run() {
+                              Live.http("PUT", p.getString("db", "") + "/calls/" + call + "/decl/" + p.getString("user", "") + ".json", "true");
+                              done.finish();
+                          }
+                      }).start();
+                      return;
+                  }
+                  // the phone restarted, or Luna was updated
+                  if (p.getString("key", "").length() == 0) return;
+                  Intent s = new Intent(c, Live.class);
+                  try { if (Build.VERSION.SDK_INT >= 26) c.startForegroundService(s); else c.startService(s); } catch (Exception e) { /* started when Luna is opened */ }
+              }
+          }
+          XEOF
+
+      - name: Build and sign the APK
+        env:
+          KEYSTORE: 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
+        run: |
+          set -e
+          SDK="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          BT="$SDK/build-tools/$(ls "$SDK/build-tools" | sort -V | tail -1)"
+          JAR="$SDK/platforms/$(ls "$SDK/platforms" | grep -E '^android-[0-9]+$' | sort -V | tail -1)/android.jar"
+          echo "Build tools: $BT"; echo "Platform: $JAR"
+          mkdir -p build/gen build/classes build/dex
+          "$BT/aapt2" compile --dir app/res -o build/res.zip
+          "$BT/aapt2" link -I "$JAR" --manifest app/AndroidManifest.xml --min-sdk-version 24 --target-sdk-version 34 \
+            --version-code "$GITHUB_RUN_NUMBER" --version-name "18.$GITHUB_RUN_NUMBER" -o build/base.apk --java build/gen build/res.zip
+          javac -source 8 -target 8 -bootclasspath "$JAR" -classpath "$JAR" -d build/classes $(find app/src build/gen -name '*.java')
+          "$BT/d8" --lib "$JAR" --min-api 24 --release --output build/dex $(find build/classes -name '*.class')
+          cp build/base.apk build/unaligned.apk
+          (cd build/dex && zip -q ../unaligned.apk classes.dex)
+          "$BT/zipalign" -f -p 4 build/unaligned.apk build/aligned.apk
+          echo "$KEYSTORE" | base64 -d > build/luna.jks
+          "$BT/apksigner" sign --ks build/luna.jks --ks-key-alias luna --ks-pass pass:lunaops --key-pass pass:lunaops --out LUNA-Ops.apk build/aligned.apk
+          "$BT/apksigner" verify LUNA-Ops.apk
+          ls -l LUNA-Ops.apk
+
+      - name: Publish the download
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete app --yes --cleanup-tag || true
+          gh release create app LUNA-Ops.apk --title "LUNA Slaughterhouse Android app" --notes "Download LUNA-Ops.apk on the Android phone and open it to install. Version 18: calls and notifications." --latest
