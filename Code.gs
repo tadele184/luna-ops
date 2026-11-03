@@ -1,4 +1,4 @@
-// LUNA server v18.3. Paste this whole file into Extensions > Apps Script (replace everything), then Run > setup.
+// LUNA server v18.5. Paste this whole file into Extensions > Apps Script (replace everything), then Run > setup.
 
 // ============================================================================================================
 // SHARED LOGIC (used by the server in Google Apps Script AND by the app on the phone).
@@ -389,7 +389,7 @@ var L = (function () {
 //   Log      who saved, corrected or erased what, and when
 //   Settings the cut-off date and the dates the admin reopened
 // ============================================================================================================
-var VERSION = "18.3";
+var VERSION = "18.5";
 var TZ = "Africa/Addis_Ababa";
 var HEAD = {
   Users: ["Username", "Name", "Role", "PIN", "Forms", "Excel", "Admin", "Active", "Email"],
@@ -802,7 +802,7 @@ function admin_(q, user) {
     var map = loadData_(), count = {};
     Object.keys(map).forEach(function (key) { var k = key.split("|")[0]; count[k] = (count[k] || 0) + 1; });
     var lg = sheet_("Log").getDataRange().getValues().slice(1).map(function (r) { return [at_(r[0]), String(r[1]), String(r[2]), String(r[3]), iso_(r[4]), String(r[5] || "")]; });
-    return { ok: true, cut: st.cut, opens: st.opens.filter(function (o) { return o.until >= t; }), count: count, log: lg.slice(-60).reverse(), t: t, firebase: settingsRaw_("firebase") };
+    return { ok: true, cut: st.cut, opens: st.opens.filter(function (o) { return o.until >= t; }), count: count, log: lg.slice(-60).reverse(), t: t, firebase: settingsRaw_("firebase"), relay: !!settingsRaw_("turn") };
   }
   var lock = LockService.getScriptLock();
   lock.waitLock(20000);
@@ -827,6 +827,22 @@ function admin_(q, user) {
       }
       setSetting_("firebase", url);
       log_(user.nm, url ? "Calls switched on" : "Calls switched off", "", "", url);
+    } else if (q.a === "adminRelay") {
+      var rs = String(q.src || "").trim(), ru = String(q.user || "").trim(), rp = String(q.pass || "").trim();
+      if (ru || rp) {                         // the username and password of a Metered credential
+        if (ru.length < 8 || rp.length < 6 || /\s/.test(ru + rp)) return { ok: false, error: "Copy the username and the password of the Metered credential (use the copy buttons)." };
+        var h = "global.relay.metered.ca";
+        rs = JSON.stringify([{ urls: "stun:stun.relay.metered.ca:80" },
+          { urls: ["turn:" + h + ":80", "turn:" + h + ":80?transport=tcp", "turn:" + h + ":443", "turns:" + h + ":443?transport=tcp"], username: ru, credential: rp }]);
+      }
+      if (rs && !/^https:\/\/[\w.-]+\/.+/.test(rs) && rs.charAt(0) !== "[") return { ok: false, error: "Paste the credentials link from Metered (it starts with https://) or the iceServers list." };
+      setSetting_("turn", rs);
+      CacheService.getScriptCache().remove("turnIce");
+      if (rs) {
+        var got = relayIce_(true);
+        if (!got.some(function (x) { return x.urls.some(function (u) { return /^turns?:/.test(u); }); })) { setSetting_("turn", ""); return { ok: false, error: "The relay did not answer with a TURN server. Check the link (API key) and try again." }; }
+      }
+      log_(user.nm, rs ? "Call relay switched on" : "Call relay switched off", "", "", "");
     } else if (q.a === "adminClose") {
       setSetting_("opens", JSON.stringify(st.opens.filter(function (o) { return o.until >= t && !(o.k === q.k && o.d === q.d); })));
       log_(user.nm, "Closed", q.k === "all" ? "" : q.k, q.d);
@@ -973,9 +989,30 @@ function pushKey_(u) {
 function pushCtx_(user) {
   var db = fbUrl_();
   if (!db) return null;
-  var ice = [{ urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] }];
-  try { var turn = JSON.parse(settingsRaw_("turn") || "null"); if (turn && turn.urls) ice.push(turn); } catch (e) { /* no relay set */ }
-  return { db: db, key: pushKey_(user.u), ice: ice };
+  var ice = [{ urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"] }].concat(relayIce_());
+  return { db: db, key: pushKey_(user.u), ice: ice, relay: ice.length > 1 };
+}
+// The call relay (TURN): when the two phones cannot reach each other directly (mobile data, company Wi-Fi), the
+// voice goes through the relay. The admin pastes the credentials link from Metered (Open Relay, free 20 GB a month),
+// or the iceServers list itself. The answer is kept for 6 hours.
+function relayIce_(fresh) {
+  var src = settingsRaw_("turn");
+  if (!src) return [];
+  var cache = CacheService.getScriptCache(), c = fresh ? null : cache.get("turnIce");
+  if (c) { try { return JSON.parse(c); } catch (e) { /* fetch again */ } }
+  var list = [];
+  try {
+    if (/^https:\/\//.test(src)) { var r = UrlFetchApp.fetch(src, { muteHttpExceptions: true }); if (r.getResponseCode() === 200) list = JSON.parse(r.getContentText()); }
+    else list = JSON.parse(src);
+  } catch (e) { list = []; }
+  if (list && !Array.isArray(list)) list = list.iceServers || [];
+  list = (list || []).filter(function (x) { return x && x.urls; }).map(function (x) {
+    var urls = [].concat(x.urls).filter(function (u) { return /^(turns?|stun):/.test(u) && !/:53(\?|$)/.test(u); });
+    var o = { urls: urls }; if (x.username) o.username = x.username; if (x.credential) o.credential = x.credential;
+    return o;
+  }).filter(function (x) { return x.urls.length; });
+  if (list.length) cache.put("turnIce", JSON.stringify(list), 21600);
+  return list;
 }
 // who receives something sent "to": everyone, management, or one person (never the sender)
 function recipients_(to, user) {
