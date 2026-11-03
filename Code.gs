@@ -1,4 +1,4 @@
-// LUNA server v18.5. Paste this whole file into Extensions > Apps Script (replace everything), then Run > setup.
+// LUNA server v18.7. Paste this whole file into Extensions > Apps Script (replace everything), then Run > setup.
 
 // ============================================================================================================
 // SHARED LOGIC (used by the server in Google Apps Script AND by the app on the phone).
@@ -22,7 +22,7 @@ var L = (function () {
     ["LA-SRV-CLF-SUP", "LA", "SRV", "Calf Supplier", "PCS", "N", "Y", 90, "Y"], ["LA-SRV-CLF-OWN", "LA", "SRV", "Calf Own", "PCS", "N", "Y", 100, "Y"],
     ["LA-SRV-BUL-SUP", "LA", "SRV", "Bull Supplier", "PCS", "N", "Y", 110, "Y"], ["LA-SRV-BUL-OWN", "LA", "SRV", "Bull Own", "PCS", "N", "Y", 120, "Y"],
     ["AM-OWN-SHG", "AM", "OWN", "Goat & Sheep", "PCS", "N", "N", 130, "Y"], ["AM-OWN-CAT", "AM", "OWN", "Cattle", "PCS", "N", "N", 140, "Y"],
-    ["AM-SRV-SHG", "AM", "SRV", "Goat & Sheep", "PCS", "N", "N", 150, "Y"], ["AM-SRV-CAT", "AM", "SRV", "Cattle", "PCS", "N", "N", 160, "Y"],
+    ["AM-SRV-SHG", "AM", "SRV", "Goat & Sheep", "PCS", "N", "Y", 150, "Y"], ["AM-SRV-CAT", "AM", "SRV", "Cattle", "PCS", "N", "Y", 160, "Y"],
     ["RS-OWN-VEAL", "RS", "OWN", "Veal", "PCS", "Y", "N", 170, "Y"], ["RS-OWN-MUTN", "RS", "OWN", "Mutton", "KG", "Y", "N", 180, "Y"],
     ["RS-OWN-LGOT", "RS", "OWN", "Local Goat", "KG", "Y", "N", 190, "Y"], ["RS-OWN-SBFC", "RS", "OWN", "Special Beef FC", "PCS", "Y", "N", 200, "Y"],
     ["RS-OWN-SRIB", "RS", "OWN", "Special Ribeye", "KG", "Y", "N", 210, "Y"], ["RS-OWN-SAGB", "RS", "OWN", "Special Aged Beef", "KG", "Y", "N", 220, "Y"],
@@ -36,7 +36,13 @@ var L = (function () {
     ["PR-OWN-LGOT", "PR", "OWN", "Local Goat", "KG", "Y", "N", 370, "Y"], ["PR-OWN-SBFC", "PR", "OWN", "Special Beef FC", "PCS", "Y", "N", 380, "Y"],
     ["PR-EXP-VEAL", "PR", "EXP", "Veal", "PCS", "N", "N", 390, "Y"], ["PR-EXP-MUTN", "PR", "EXP", "Mutton", "KG", "N", "N", 400, "Y"],
     ["PR-EXP-LGOT", "PR", "EXP", "Local Goat", "KG", "N", "N", 410, "Y"], ["PR-EXP-SBFC", "PR", "EXP", "Special Beef FC", "PCS", "N", "N", 420, "Y"],
-    ["PR-SRV-SHG", "PR", "SRV", "Goat & Sheep", "KG", "N", "Y", 430, "Y"], ["PR-SRV-CAT", "PR", "SRV", "Cattle", "KG", "N", "Y", 440, "Y"]
+    ["PR-SRV-SHG", "PR", "SRV", "Goat & Sheep", "KG", "N", "Y", 430, "Y"], ["PR-SRV-CAT", "PR", "SRV", "Cattle", "KG", "N", "Y", 440, "Y"],
+    // Production is counted in pieces AND kg: each production item has a second code for its other unit
+    ["PR-OWN-VEAL-KG", "PR", "OWN", "Veal", "KG", "Y", "N", 351, "Y"], ["PR-OWN-MUTN-PCS", "PR", "OWN", "Mutton", "PCS", "Y", "N", 361, "Y"],
+    ["PR-OWN-LGOT-PCS", "PR", "OWN", "Local Goat", "PCS", "Y", "N", 371, "Y"], ["PR-OWN-SBFC-KG", "PR", "OWN", "Special Beef FC", "KG", "Y", "N", 381, "Y"],
+    ["PR-EXP-VEAL-KG", "PR", "EXP", "Veal", "KG", "N", "N", 391, "Y"], ["PR-EXP-MUTN-PCS", "PR", "EXP", "Mutton", "PCS", "N", "N", 401, "Y"],
+    ["PR-EXP-LGOT-PCS", "PR", "EXP", "Local Goat", "PCS", "N", "N", 411, "Y"], ["PR-EXP-SBFC-KG", "PR", "EXP", "Special Beef FC", "KG", "N", "N", 421, "Y"],
+    ["PR-SRV-SHG-PCS", "PR", "SRV", "Goat & Sheep", "PCS", "N", "Y", 431, "Y"], ["PR-SRV-CAT-PCS", "PR", "SRV", "Cattle", "PCS", "N", "Y", 441, "Y"]
   ];
   // Service livestock is counted per service customer (customer_required = Y), so each customer's animals can be
   // followed through ante mortem and production.
@@ -59,9 +65,13 @@ var L = (function () {
   var ITEM = {}, ITEMS = ITEM_ROWS.map(function (r) {
     var it = { c: r[0], st: r[1], sg: r[2], nm: r[3], u: r[4], ch: r[5] === "Y", cu: r[6] === "Y", so: r[7], on: r[8] === "Y" };
     it.p = r[0].split("-").slice(2).join("-");                       // the item part of the code: VEAL, SHP-HL, ...
+    if (r[1] === "PR" && /-(KG|PCS)$/.test(r[0])) { it.pair = true; it.base = r[0].replace(/-(KG|PCS)$/, ""); it.p = it.p.replace(/-(KG|PCS)$/, ""); }
     it.g = r[1] === "AM" ? it.p : /^(SHP|GOT)/.test(it.p) ? "SHG" : /^(CLF|BUL)/.test(it.p) ? "CAT" : "";   // head group
     ITEM[r[0]] = it; return it;
   });
+  ITEMS.forEach(function (it) { if (it.pair && ITEM[it.base]) ITEM[it.base].mate = it.c; });
+  // the [pieces code, kg code] of a production item
+  function units(c) { var it = ITEM[c]; if (!it) return [null, null]; var b = it.pair ? ITEM[it.base] : it, m = ITEM[b.mate]; return b.u === "PCS" ? [b.c, m && m.c] : [m && m.c, b.c]; }
   var CUSTOMERS = CUSTOMER_ROWS.map(function (c) { return c[1]; }), CU = {};
   CUSTOMER_ROWS.forEach(function (c) { CU[c[0]] = c[1]; });
   function name(list, code) { for (var i = 0; i < list.length; i++) if (list[i][0] === code) return list[i][1]; return code; }
@@ -88,10 +98,11 @@ var L = (function () {
   function dDM(iso) { var d = dObj(iso); return ("0" + d.getUTCDate()).slice(-2) + " " + MON[d.getUTCMonth()]; }
   function range(d1, d2) { var out = [], d = d1; while (d <= d2) { out.push(d); d = addDays(d, 1); } return out; }
 
-  // Which dates each form may be saved for, relative to today. The admin may also correct the past week.
+  // Which dates each form may be saved (and corrected) for, relative to today: everyone the past week, the admin the
+  // past month. A cut-off set by the admin closes older dates for everyone.
   function win(kind, admin) {
-    var w = { lv: [-1, 0], am: [-1, 1], order: [-1, 2], prod: [-2, 0], stock: [-2, 0] }[kind];
-    return admin ? [Math.min(w[0], -7), w[1]] : [w[0], w[1]];
+    var w = { lv: [-7, 0], am: [-7, 1], order: [-7, 2], prod: [-7, 0], stock: [-7, 0] }[kind];
+    return admin ? [-31, w[1]] : [w[0], w[1]];
   }
   function defaultDate(kind, t) { return addDays(t, { lv: 0, am: 1, order: 1, prod: 0, stock: 0 }[kind]); }
 
@@ -125,7 +136,7 @@ var L = (function () {
   // Saved before the data model changed (version 17 and older): kept in the sheet, not used by the app.
   function isNew(kind, rows) {
     if (!Array.isArray(rows)) return false;
-    if (kind === "stock") return rows.every(function (r) { return r && PROD[r.sp] && Object.keys(r.out || {}).every(function (k) { return typeof r.out[k] === "number"; }); });
+    if (kind === "stock") return rows.every(function (r) { return r && PROD[r.sp] && Object.keys(r.out || {}).every(function (k) { return typeof r.out[k] === "number" || Array.isArray(r.out[k]); }); });
     return rows.every(function (r) { return r && ITEM[r.ic]; });
   }
 
@@ -167,12 +178,32 @@ var L = (function () {
     }
     if (!out.length) return bad("Nothing entered yet.");
     if (kind === "am") {
-      var av = available(d, getDoc), ins = {};
-      out.forEach(function (r) { var g = ITEM[r.ic].sg + "|" + ITEM[r.ic].g; ins[g] = (ins[g] || 0) + r.q + (r.rj || 0); });
+      var av = available(d, getDoc), avc = availableCu(d, getDoc), ins = {}, insc = {};
+      out.forEach(function (r) {
+        var it = ITEM[r.ic], g = it.sg + "|" + it.g, n = r.q + (r.rj || 0);
+        ins[g] = (ins[g] || 0) + n;
+        if (r.cu) insc[r.cu + "|" + it.g] = (insc[r.cu + "|" + it.g] || 0) + n;
+      });
       Object.keys(ins).forEach(function (g) {
         var p = g.split("|");
         if (g in av && ins[g] > av[g]) warn.push(sgShort(p[0]) + " " + grpName(p[1]) + ": " + ins[g] + " inspected but " + av[g] + " available.");
       });
+      Object.keys(insc).forEach(function (k) {         // each service customer: inspected cannot be more than its animals in the lairage
+        var p = k.split("|");
+        if (insc[k] > (avc[k] || 0)) warn.push(cuName(p[0]) + " " + grpName(p[1]).toLowerCase() + ": " + insc[k] + " inspected but " + (avc[k] || 0) + " in the lairage.");
+      });
+    }
+    if (kind === "prod") {                       // pieces and kg go together, and kg per carcass must be possible
+      var by = {};
+      out.forEach(function (r) { var it = ITEM[r.ic], b = it.pair ? it.base : it.c, k = b + "|" + r.ch + "|" + r.cu; by[k] = by[k] || [0, 0]; by[k][it.u === "PCS" ? 0 : 1] += r.q; });
+      for (var bk in by) {
+        var pp = bk.split("|"), bi = ITEM[pp[0]], whoP = (pp[2] ? cuName(pp[2]) : pp[1] ? "Own " + chName(pp[1]) : sgShort(bi.sg)) + " " + bi.nm, v2 = by[bk];
+        if (v2[0] && !v2[1]) return bad(whoP + ": enter the kg too.");
+        if (v2[1] && !v2[0]) return bad(whoP + ": enter the pieces too.");
+        var gp = PGROUP[bi.p], per = v2[1] / v2[0];
+        if (per > 450) return bad(whoP + ": " + n1(per) + " kg per piece is not possible. Check pieces and kg.");
+        if (gp === "SHG" && (per < YIELD.SHG.lo * 0.75 || per > YIELD.SHG.hi * 1.4)) warn.push(whoP + ": " + n1(per) + " kg per carcass is outside the usual " + YIELD.SHG.lo + "-" + YIELD.SHG.hi + " kg.");
+      }
     }
     if (kind === "order" || kind === "prod") warn = warn.concat(kgCheck(kind, d, out, getDoc));
     return { d: d, rows: out, warn: warn, err: null };
@@ -182,23 +213,28 @@ var L = (function () {
   function kgCheck(kind, d, rows, getDoc) {
     var warn = [], pass = getDoc("am", d) ? amPassed(d, getDoc) : available(d, getDoc), la = getDoc("lv", addDays(d, -1)) || [];
     var kg = {}, src = getDoc("am", d) ? "passed ante mortem" : "available";
+    var pcs = {};
     rows.forEach(function (r) {
-      var it = ITEM[r.ic]; if (!it || it.u !== "KG") return;
+      var it = ITEM[r.ic]; if (!it) return;
       var g = PGROUP[it.p], k = it.sg === "SRV" ? "SRV|" + r.cu + "|" + g : "OWN|" + g;
-      kg[k] = r1((kg[k] || 0) + r.q);
+      if (it.u === "KG") kg[k] = r1((kg[k] || 0) + r.q);
+      else if (kind === "prod" && g === "SHG") pcs[k] = (pcs[k] || 0) + r.q;     // one goat or sheep carcass per head
+    });
+    Object.keys(pcs).forEach(function (k) {
+      var p = k.split("|"), hd = p[0] === "OWN" ? pass["OWN|SHG"] : (byCu(getDoc("am", d))[p[1] + "|SHG"] !== undefined ? byCu(getDoc("am", d))[p[1] + "|SHG"] : byCu(la)[p[1] + "|SHG"]);
+      if (hd !== undefined && pcs[k] > hd) warn.push((p[0] === "OWN" ? "Own and Export goat & sheep" : cuName(p[1]) + " goat & sheep") + ": " + n(pcs[k]) + " carcasses produced but only " + n(hd) + " heads.");
     });
     Object.keys(kg).forEach(function (k) {
-      var p = k.split("|"), g = p[p.length - 1], heads = null, who;
+      var p = k.split("|"), g = p[p.length - 1], heads = null, who, src2 = "";
       if (p[0] === "OWN") { heads = pass["OWN|" + g]; who = "Own and Export " + grpName(g).toLowerCase(); }
       else {
-        var cnt = 0, any = false;
-        la.forEach(function (r) { var it = ITEM[r.ic]; if (it && it.sg === "SRV" && r.cu === p[1] && it.g === g) { cnt += r.q; any = true; } });
-        if (any) heads = cnt;
+        var amc = byCu(getDoc("am", d)), lac = byCu(la), kk = p[1] + "|" + g;
+        if (kk in amc) { heads = amc[kk]; src2 = "passed ante mortem"; } else if (kk in lac) { heads = lac[kk]; src2 = "in the lairage"; }
         who = cuName(p[1]) + " " + grpName(g).toLowerCase();
       }
       if (heads === null || heads === undefined) return;
       var most = heads * YIELD[g].max;
-      if (kg[k] > most) warn.push(who + ": " + n1(kg[k]) + " kg " + (kind === "order" ? "reserved" : "produced") + " is more than " + n(heads) + " heads " + (p[0] === "OWN" ? src : "in the lairage") + " can give (at most about " + n(most) + " kg). Check the kg or the heads.");
+      if (kg[k] > most) warn.push(who + ": " + n1(kg[k]) + " kg " + (kind === "order" ? "reserved" : "produced") + " is more than " + n(heads) + " heads " + (p[0] === "OWN" ? src : src2) + " can give (at most about " + n(most) + " kg). Check the kg or the heads.");
     });
     return warn;
   }
@@ -211,6 +247,13 @@ var L = (function () {
     return t;
   }
   function available(S, getDoc) { return heads(getDoc("lv", addDays(S, -1))); }
+  // per service customer and group: {"CUS-001|SHG": n}, from Livestock Availability (field "q") or Ante Mortem
+  function byCu(rows, field) {
+    var t = {};
+    (rows || []).forEach(function (r) { var it = ITEM[r.ic]; if (!it || !it.g || !r.cu) return; var k = r.cu + "|" + it.g; t[k] = (t[k] || 0) + (Number(r[field || "q"]) || 0); });
+    return t;
+  }
+  function availableCu(S, getDoc) { return byCu(getDoc("lv", addDays(S, -1))); }
   function amPassed(S, getDoc) { return heads(getDoc("am", S)); }
 
   function plan(S, getDoc) {
@@ -226,10 +269,13 @@ var L = (function () {
     var lines = {}, list = [];
     function add(rows, f) {
       (rows || []).forEach(function (r) {
-        var it = ITEM[r.ic]; if (!it) return;
+        var it0 = ITEM[r.ic]; if (!it0) return;
+        var it = it0.pair ? ITEM[it0.base] : it0;
         var k = it.sg + "|" + it.p + "|" + (r.ch || "") + "|" + (r.cu || "");
-        if (!lines[k]) { lines[k] = { sg: it.sg, p: it.p, nm: it.nm, u: it.u, ch: r.ch || "", cu: r.cu || "", res: null, act: null }; list.push(lines[k]); }
-        lines[k][f] = r1((lines[k][f] || 0) + r.q);
+        if (!lines[k]) { lines[k] = { sg: it.sg, p: it.p, nm: it.nm, u: it.u, ch: r.ch || "", cu: r.cu || "", res: null, act: null, ap: null, ak: null }; list.push(lines[k]); }
+        var x = lines[k];
+        if (f === "act") { if (it0.u === "PCS") x.ap = (x.ap || 0) + r.q; else x.ak = r1((x.ak || 0) + r.q); }
+        if (it0.u === x.u) x[f] = r1((x[f] || 0) + r.q);           // reserved and produced compare in the reservation's unit
       });
     }
     add(rs, "res"); add(pr, "act");
@@ -240,7 +286,7 @@ var L = (function () {
     });
     var tot = { av: 0, ok: 0, rj: 0, rp: 0, rk: 0, ap: 0, ak: 0 };
     hd.forEach(function (x) { tot.av += x.av || 0; tot.ok += x.ok || 0; tot.rj += x.rj; });
-    list.forEach(function (x) { if (x.u === "KG") { tot.rk = r1(tot.rk + (x.res || 0)); tot.ak = r1(tot.ak + (x.act || 0)); } else { tot.rp += x.res || 0; tot.ap += x.act || 0; } });
+    list.forEach(function (x) { if (x.u === "KG") tot.rk = r1(tot.rk + (x.res || 0)); else tot.rp += x.res || 0; tot.ap += x.ap || 0; tot.ak = r1(tot.ak + (x.ak || 0)); });
     return { day: S, lvDay: lvDay, heads: hd.filter(function (x) { return x.av !== null || x.ok !== null; }), items: list, tot: tot, la: la || [],
       has: { lv: !!la, am: !!am, order: !!rs, prod: !!pr } };
   }
@@ -274,13 +320,13 @@ var L = (function () {
   }
 
   // ---------------------------------------------------------------- dispatch and stock (the carcass entry sheet)
-  // Products come from the Production items (Own and Export together; service per customer). Each product has one
-  // unit (PCS or KG), like its item. One stock document per date: rows [{sp: product, open: qty or null, out: {line: qty}}].
-  // In = Production of that date. Balance = BBF + In - local sale - service customers - export - damage - shrinkage (kg).
-  // Detained carcasses stay in the warehouse (shown, not deducted).
+  // Products come from the Production items (Own and Export together; service per customer), counted in pieces AND kg,
+  // like the carcass entry sheet. One stock document per date: rows [{sp: product, open: [pcs, kg] or null,
+  // out: {line: [pcs, kg]}}]. In = Production of that date. Balance = BBF + In - local sale - service customers - export
+  // - damage (pcs and kg) - shrinkage (kg). Detained carcasses stay in the warehouse (shown, not deducted).
   var PRODUCTS = [], PROD = {};
   ITEMS.forEach(function (it) {
-    if (it.st !== "PR" || PROD[it.p]) return;
+    if (it.st !== "PR" || it.pair || PROD[it.p]) return;
     PROD[it.p] = { k: it.p, nm: it.sg === "SRV" ? "Service " + it.nm.toLowerCase() : it.nm, u: it.u };
     PRODUCTS.push(PROD[it.p]);
   });
@@ -296,6 +342,14 @@ var L = (function () {
   }
   function prodName(k) { return PROD[k] ? PROD[k].nm : k; }
   function prodUnit(k) { return PROD[k] ? PROD[k].u : "PCS"; }
+  // a stock value as [pieces, kg]; a single number saved by version 18.0-18.6 counts in the product's own unit
+  function pair(v, sp) { if (Array.isArray(v)) return [Number(v[0]) || 0, r1(Number(v[1]) || 0)]; var x = Number(v) || 0; return prodUnit(sp) === "KG" ? [0, r1(x)] : [x, 0]; }
+  function normStock(rows) {
+    return (rows || []).map(function (r) {
+      var o = {}; Object.keys(r.out || {}).forEach(function (k) { o[k] = pair(r.out[k], r.sp); });
+      return { sp: r.sp, open: r.open === null || r.open === undefined || r.open === "" ? null : pair(r.open, r.sp), out: o };
+    });
+  }
   function cleanStock(data, t, admin, allow) {
     var bad = function (m) { return { err: m, warn: [] }; };
     var d = data && data.d;
@@ -310,24 +364,29 @@ var L = (function () {
       var o = {}, src = r.out || {};
       for (var k in src) {
         if (keys.indexOf(k) < 0) return bad(p.nm + ": unknown line " + k + ".");
-        if (k === "shr" && p.u !== "KG") return bad(p.nm + ": shrinkage is only for kg products.");
-        var v = qty(src[k], p.u, k === "shr" ? -1000 : 0);
-        if (v === null) return bad(p.nm + ", " + outLabel(k) + (p.u === "KG" ? ": kg must be a number." : ": enter whole pieces."));
-        if (v) o[k] = v;
+        var v = Array.isArray(src[k]) ? src[k] : [0, 0];
+        var pc = k === "shr" ? 0 : int_(v[0] === "" || v[0] == null ? 0 : v[0], 0, 100000), kg = num_(v[1] === "" || v[1] == null ? 0 : v[1], k === "shr" ? -1000 : 0, 1e7);
+        if (pc === null || kg === null) return bad(p.nm + ", " + outLabel(k) + ": pieces must be whole numbers and kg a number.");
+        if (pc && !kg) return bad(p.nm + ", " + outLabel(k) + ": enter the kg.");
+        if (pc && kg / pc > 450) return bad(p.nm + ", " + outLabel(k) + ": " + n1(kg / pc) + " kg per piece is not possible.");
+        if (pc || kg) o[k] = [pc, kg];
       }
       var open = null;
-      if (admin && r.open !== null && r.open !== undefined && r.open !== "") {
-        open = qty(r.open, p.u);
-        if (open === null) return bad(p.nm + ": the opening stock must be a number.");
+      if (admin && Array.isArray(r.open)) {
+        var op = int_(r.open[0] === "" || r.open[0] == null ? 0 : r.open[0], 0, 100000), ok = num_(r.open[1] === "" || r.open[1] == null ? 0 : r.open[1], 0, 1e7);
+        if (op === null || ok === null) return bad(p.nm + ": the opening stock must be numbers.");
+        open = [op, ok];
       }
       out.push({ sp: r.sp, open: open, out: o });
     }
     if (!out.length) return bad("Nothing entered yet.");
     return { d: d, rows: out, warn: [], err: null };
   }
+  function add2(a, b) { return [a[0] + b[0], r1(a[1] + b[1])]; }
+  function sub2(a, b) { return [a[0] - b[0], r1(a[1] - b[1])]; }
   function prodByProduct(rows) {
     var t = {};
-    (rows || []).forEach(function (r) { var it = ITEM[r.ic]; if (it) t[it.p] = r1((t[it.p] || 0) + r.q); });
+    (rows || []).forEach(function (r) { var it = ITEM[r.ic]; if (!it) return; var x = t[it.p] = t[it.p] || [0, 0]; if (it.u === "PCS") x[0] += r.q; else x[1] = r1(x[1] + r.q); });
     return t;
   }
   // What was produced that day per dispatch line, as a suggestion: Own FC -> Fresh Corner, KIT -> Fresh Kitchen,
@@ -337,32 +396,33 @@ var L = (function () {
     (rows || []).forEach(function (r) {
       var it = ITEM[r.ic]; if (!it) return;
       var k = it.sg === "OWN" ? (r.ch === "KIT" ? "fk" : "fc") : it.sg === "EXP" ? "exp" : r.cu;
-      var x = (u[it.p] = u[it.p] || {}); x[k] = r1((x[k] || 0) + r.q);
+      var x = (u[it.p] = u[it.p] || {}), y = (x[k] = x[k] || [0, 0]);
+      if (it.u === "PCS") y[0] += r.q; else y[1] = r1(y[1] + r.q);
     });
     return u;
   }
-  // One product on one day. bbf and inn are numbers; row is the saved stock row (or null).
+  // One product on one day. bbf and inn are [pcs, kg]; row is the saved stock row (or null).
   function stockLine(sp, bbf, inn, row) {
-    var o = (row && row.out) || {}, g = function (k) { return o[k] || 0; };
-    var sumOf = function (ks) { return r1(ks.reduce(function (a, k) { return a + g(k); }, 0)); };
-    var b = row && row.open !== null && row.open !== undefined ? row.open : bbf;
-    var tot = r1(b + inn), local = sumOf(LOCAL.map(function (x) { return x[0]; })), service = sumOf(CUSTOMER_ROWS.map(function (c) { return c[0]; }));
-    var exp = g("exp"), dmg = g("dmg"), det = sumOf(["detp", "detl"]), shr = g("shr");
-    var bal = r1(tot - local - service - exp - dmg - shr), u = prodUnit(sp);
-    return { sp: sp, nm: prodName(sp), u: u, open: !!(row && row.open !== null && row.open !== undefined), bbf: b, inn: inn, tot: tot, out: o, local: local, service: service,
-      exp: exp, det: det, dmg: dmg, shr: shr, bal: bal, rate: u === "KG" && inn > 0 ? shr / inn : null, perf: inn > 0 ? (service + exp - shr) / inn : null };
+    var o = (row && row.out) || {}, g = function (k) { return o[k] ? pair(o[k], sp) : [0, 0]; };
+    var sumOf = function (ks) { return ks.reduce(function (a, k) { return add2(a, g(k)); }, [0, 0]); };
+    var b = row && row.open ? pair(row.open, sp) : bbf;
+    var tot = add2(b, inn), local = sumOf(LOCAL.map(function (x) { return x[0]; })), service = sumOf(CUSTOMER_ROWS.map(function (c) { return c[0]; }));
+    var exp = g("exp"), dmg = g("dmg"), det = sumOf(["detp", "detl"]), shr = g("shr")[1];
+    var out = add2(add2(local, service), exp), bal = sub2(sub2(sub2(tot, out), dmg), [0, shr]);
+    return { sp: sp, nm: prodName(sp), u: prodUnit(sp), open: !!(row && row.open), bbf: b, inn: inn, tot: tot, out: o, local: local, service: service, exp: exp,
+      sold: out, det: det, dmg: dmg, shr: shr, bal: bal, rate: inn[1] > 0 ? shr / inn[1] : null, perf: inn[1] > 0 ? (service[1] + exp[1] - shr) / inn[1] : null };
   }
   // Runs the stock from the first day with production or stock up to "until". days = every date that has a prod or
-  // stock document (any order). Returns {byDay: {day: {product: line}}, bal: {product: qty}}.
+  // stock document (any order). Returns {byDay: {day: {product: line}}, bal: {product: [pcs, kg]}}.
   function ledger(days, getDoc, until) {
     var list = days.filter(function (d) { return d <= until; }).sort(), seen = {}, bal = {}, byDay = {};
     list.forEach(function (d) {
       if (seen[d]) return; seen[d] = 1;
-      var inn = prodByProduct(getDoc("prod", d)), st = getDoc("stock", d) || [], rowOf = {};
+      var inn = prodByProduct(getDoc("prod", d)), st = normStock(getDoc("stock", d)), rowOf = {};
       st.forEach(function (r) { rowOf[r.sp] = r; });
-      var ps = PRODUCTS.map(function (p) { return p.k; }).filter(function (k) { return bal[k] || inn[k] || rowOf[k]; });
+      var ps = PRODUCTS.map(function (p) { return p.k; }).filter(function (k) { return (bal[k] && (bal[k][0] || bal[k][1])) || inn[k] || rowOf[k]; });
       byDay[d] = {};
-      ps.forEach(function (k) { var x = stockLine(k, bal[k] || 0, inn[k] || 0, rowOf[k] || null); byDay[d][k] = x; bal[k] = x.bal; });
+      ps.forEach(function (k) { var x = stockLine(k, bal[k] || [0, 0], inn[k] || [0, 0], rowOf[k] || null); byDay[d][k] = x; bal[k] = x.bal; });
     });
     return { byDay: byDay, bal: bal };
   }
@@ -372,8 +432,8 @@ var L = (function () {
     STAGE: STAGE, KINDS: KINDS, YIELD: YIELD, PGROUP: PGROUP, REASONS: REASONS, GROUPS: GROUPS, PRODUCTS: PRODUCTS, PROD: PROD, LOCAL: LOCAL, EXPORT: EXPORT, QUALITY: QUALITY,
     items: items, segs: segs, cuName: cuName, chName: chName, sgName: sgName, sgShort: sgShort, grpName: grpName, label: label, remarks: remarks, key: key, isNew: isNew,
     isISO: isISO, inWin: inWin, addDays: addDays, diff: diff, dShort: dShort, dLong: dLong, dDM: dDM, range: range, win: win, defaultDate: defaultDate,
-    n: n, n1: n1, nu: nu, r1: r1, txt: txt, clean: clean, heads: heads, available: available, amPassed: amPassed, plan: plan, hasAny: hasAny, lineName: lineName, alerts: alerts,
-    outKeys: outKeys, outLabel: outLabel, prodName: prodName, prodUnit: prodUnit, cleanStock: cleanStock, prodByProduct: prodByProduct, useOf: useOf, stockLine: stockLine, ledger: ledger
+    n: n, n1: n1, nu: nu, r1: r1, txt: txt, clean: clean, heads: heads, available: available, availableCu: availableCu, byCu: byCu, amPassed: amPassed, plan: plan, hasAny: hasAny, lineName: lineName, alerts: alerts,
+    outKeys: outKeys, outLabel: outLabel, prodName: prodName, prodUnit: prodUnit, cleanStock: cleanStock, normStock: normStock, pair: pair, units: units, add2: add2, prodByProduct: prodByProduct, useOf: useOf, stockLine: stockLine, ledger: ledger
   };
 })();
 
@@ -389,14 +449,14 @@ var L = (function () {
 //   Log      who saved, corrected or erased what, and when
 //   Settings the cut-off date and the dates the admin reopened
 // ============================================================================================================
-var VERSION = "18.5";
+var VERSION = "18.7";
 var TZ = "Africa/Addis_Ababa";
 var HEAD = {
   Users: ["Username", "Name", "Role", "PIN", "Forms", "Excel", "Admin", "Active", "Email"],
   Data: ["Form", "Date", "Data (do not edit)", "Saved by", "Saved at"],
   History: ["Form", "Date", "Data", "Saved by", "Saved at", "Replaced at"],
   daily_entry: ["entry_date", "item_code", "channel_code", "customer_code", "qty", "remarks", "entered_by", "created_at", "updated_at"],
-  stock_entry: ["entry_date", "product", "line", "qty", "uom", "entered_by", "updated_at"],
+  stock_entry: ["entry_date", "product", "line", "pcs", "kg", "entered_by", "updated_at"],
   item_master: ["item_code", "stage_code", "segment_code", "item_name", "uom", "channel_required", "customer_required", "sort_order", "active"],
   customer_master: ["customer_code", "customer_name", "phone", "active"],
   lookups: ["stage_code", "stage_name", "segment_code", "segment_name", "channel_code", "channel_name", "uom", "yes_no"],
@@ -481,8 +541,10 @@ function masters_() {
       L.CHANNELS[i] ? L.CHANNELS[i][0] : "", L.CHANNELS[i] ? L.CHANNELS[i][1] : "", ["PCS", "KG", "", ""][i], ["Y", "N", "", ""][i]]);
     lk.getRange(2, 1, rows.length, 8).setValues(rows);
   }
-  if (!ss.getSheetByName("daily_summary")) {
-    var sm = ss.insertSheet("daily_summary"), out = [["LUNA Daily Numbers", "", "", "", "", ""], ["Report date", today_(), "", "", "", ""], ["", "", "", "", "", ""],
+  if (true) {                                  // rebuilt at every setup, so new items appear (the report date is kept)
+    var sm = ss.getSheetByName("daily_summary"), keepDate = today_();
+    if (sm) { var d0 = sm.getRange(2, 2).getValues()[0][0]; if (d0) keepDate = d0; sm.clearContents(); } else sm = ss.insertSheet("daily_summary");
+    var out = [["LUNA Daily Numbers", "", "", "", "", ""], ["Report date", keepDate, "", "", "", ""], ["", "", "", "", "", ""],
       ["Item", "UOM", "Fresh Corner", "Kitchen", "Total", "item_code"]];
     var E = "daily_entry!$E:$E,daily_entry!$A:$A,$B$2,daily_entry!$B:$B,$F";
     L.STAGES.forEach(function (st) {
@@ -613,6 +675,7 @@ function loadData_() {
     var rows = null;
     try { rows = JSON.parse(v[i][2]).rows; } catch (e) { rows = null; }
     if (!L.isNew(k, rows)) continue;                  // saved in the layout before version 18: kept in the sheet, not used
+    if (k === "stock") rows = L.normStock(rows);      // pieces and kg
     map[k + "|" + d] = { rows: rows, by: String(v[i][3] || ""), at: at_(v[i][4]), row: i + 1 };
   }
   return map;
@@ -659,9 +722,10 @@ function save_(q, user) {
       var day = L.ledger(stockDays_(trial).concat([c.d]), getter_(trial), c.d).byDay[c.d] || {};
       for (var sp in day) {
         var x = day[sp];
-        if (x.bal < 0 && x.u === "PCS") return { ok: false, error: x.nm + ": " + (-x.bal) + " pieces more dispatched than in stock (" + x.tot + ")." };
-        if (x.bal < 0) c.warn.push(x.nm + ": the balance is below zero (" + x.bal + " kg). Check the weights.");
-        if (x.u === "KG" && x.shr > 0 && x.tot > 0 && x.shr > 0.05 * x.tot) c.warn.push(x.nm + ": shrinkage " + x.shr + " kg is " + (x.shr / x.tot * 100).toFixed(1) + "% of the stock. Chilled carcasses usually lose 1-3%. Check the weights.");
+        if (x.bal[0] < 0) return { ok: false, error: x.nm + ": " + (-x.bal[0]) + " pieces more dispatched than in stock (" + x.tot[0] + ")." };
+        if (x.bal[1] < 0) c.warn.push(x.nm + ": the kg balance is below zero (" + x.bal[1] + " kg). Check the weights.");
+        if (x.bal[0] === 0 && x.bal[1] > 0.5) c.warn.push(x.nm + ": no pieces left but " + x.bal[1] + " kg still in stock. Check the weights or record the shrinkage.");
+        if (x.shr > 0 && x.tot[1] > 0 && x.shr > 0.05 * x.tot[1]) c.warn.push(x.nm + ": shrinkage " + x.shr + " kg is " + (x.shr / x.tot[1] * 100).toFixed(1) + "% of the stock. Chilled carcasses usually lose 1-3%. Check the weights.");
       }
     } else {
       var off = activeMaster_(), gone = c.rows.filter(function (r) { return off[r.ic] || (r.cu && off[r.cu]); })[0];
@@ -698,9 +762,8 @@ function writeEntries_(k, d, rows, by, at) {
   });
   rows.forEach(function (r) {
     if (stock) {
-      var u = L.prodUnit(r.sp);
-      if (r.open !== null && r.open !== undefined) keep.push([d, L.prodName(r.sp), "Opening stock (set)", r.open, u, by, at]);
-      Object.keys(r.out).forEach(function (o) { keep.push([d, L.prodName(r.sp), L.outLabel(o), r.out[o], o === "shr" ? "KG" : u, by, at]); });
+      if (r.open) keep.push([d, L.prodName(r.sp), "Opening stock (set)", r.open[0], r.open[1], by, at]);
+      Object.keys(r.out).forEach(function (o) { keep.push([d, L.prodName(r.sp), L.outLabel(o), o === "shr" ? "" : r.out[o][0], r.out[o][1], by, at]); });
       return;
     }
     var key = r.ic + "|" + (r.ch || "") + "|" + (r.cu || "");
@@ -708,6 +771,7 @@ function writeEntries_(k, d, rows, by, at) {
   });
   var so = function (r) { var it = L.ITEM[r[1]]; return it ? it.so : 0; };
   keep.sort(function (a, b) { return a[0] < b[0] ? -1 : a[0] > b[0] ? 1 : stock ? 0 : so(a) - so(b); });
+  if (stock) sh.getRange(1, 1, 1, n).setValues([HEAD.stock_entry]);       // the header changed in 18.7 (pieces and kg)
   if (last > 1) sh.getRange(2, 1, last - 1, n).clearContent();
   if (keep.length) sh.getRange(2, 1, keep.length, n).setValues(keep);
 }
@@ -732,7 +796,7 @@ function ctx_(user, map) {
       if (x) { (data[k] = data[k] || {})[d] = x.rows; (meta[k] = meta[k] || {})[d] = [x.by, x.at]; }
     });
   });
-  if (ks.indexOf("am") >= 0) { pre.av = {}; days("am").forEach(function (d) { pre.av[d] = L.available(d, get); }); }
+  if (ks.indexOf("am") >= 0) { pre.av = {}; pre.avCu = {}; days("am").forEach(function (d) { pre.av[d] = L.available(d, get); pre.avCu[d] = L.availableCu(d, get); }); }
   if (ks.indexOf("order") >= 0) {
     pre.ok = {}; pre.av2 = {};
     days("order").forEach(function (d) { pre.ok[d] = get("am", d) ? L.amPassed(d, get) : null; pre.av2[d] = L.available(d, get); });
@@ -760,7 +824,7 @@ function ctx_(user, map) {
   var led = L.ledger(stockDays_(map).concat([t]), get, t), stock = { now: led.bal, days: [] };
   Object.keys(led.byDay).sort().reverse().slice(0, 7).forEach(function (d) {
     var day = led.byDay[d];
-    stock.days.push([d, Object.keys(day).map(function (sp) { var x = day[sp]; return [sp, x.bbf, x.inn, L.r1(x.local + x.service + x.exp), L.r1(x.dmg + x.shr), x.bal, x.u]; }), !!get("stock", d)]);
+    stock.days.push([d, Object.keys(day).map(function (sp) { var x = day[sp]; return [sp, x.bbf, x.inn, x.sold, L.add2(x.dmg, [0, x.shr]), x.bal, x.u]; }), !!get("stock", d)]);
   });
   var dl = [];                          // the last 10 slaughter days and tomorrow, newest first
   for (var i = 1; i >= -9; i--) {
@@ -940,7 +1004,8 @@ function msg_(q, user) {
       if (q.what === "done" && mm.heard.indexOf(user.u) < 0) { mm.heard.push(user.u); sh.getRange(mm.row, 11).setValue(mm.heard.join(",")); }
     } else if (q.a === "msgDelete") {
       var md = messages_().filter(function (x) { return x.id === q.id; })[0];
-      if (!md || (md.from !== user.u && !user.admin)) return { ok: false, error: "You can delete only your own messages." };
+      if (!md) return { ok: false, error: "Message not found." };
+      if (!user.admin && (md.from !== user.u || md.kind !== "text")) return { ok: false, error: md.kind === "text" ? "You can delete only your own messages." : "Only the super admin can delete voice notes, photos, videos and calls." };
       if (md.file) { try { DriveApp.getFileById(md.file).setTrashed(true); } catch (e) { /* already gone */ } }
       sh.deleteRow(md.row);
     } else return { ok: false, error: "Unknown request." };
@@ -954,7 +1019,7 @@ function msg_(q, user) {
 function dailyDigest() {
   var map = loadData_(), get = getter_(map), t = today_(), p = L.plan(t, get), nx = L.plan(L.addDays(t, 1), get), T = p.tot, N = nx.tot;
   var led = L.ledger(stockDays_(map).concat([t]), get, t).bal, sk = [0, 0];
-  Object.keys(led).forEach(function (k) { if (L.prodUnit(k) === "KG") sk[1] += led[k]; else sk[0] += led[k]; });
+  Object.keys(led).forEach(function (k) { sk[0] += led[k][0]; sk[1] += led[k][1]; });
   var to = users_().filter(function (u) { return u.active && u.email && u.mgr; }).map(function (u) { return u.email; });
   if (!to.length) return;
   var tile = function (lab, val, sub) { return '<td style="padding:12px 14px;background:#f4f5f7;border-radius:12px;border-top:3px solid #e6332a"><div style="font:700 11px Arial;color:#6e8592;text-transform:uppercase">' + lab + '</div><div style="font:800 24px Arial;color:#1c2730">' + val + '</div><div style="font:12px Arial;color:#6e8592">' + (sub || "") + "</div></td>"; };
