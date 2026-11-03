@@ -1,4 +1,4 @@
-// LUNA server v18.1. Paste this whole file into Extensions > Apps Script (replace everything), then Run > setup.
+// LUNA server v18.3. Paste this whole file into Extensions > Apps Script (replace everything), then Run > setup.
 
 // ============================================================================================================
 // SHARED LOGIC (used by the server in Google Apps Script AND by the app on the phone).
@@ -18,9 +18,9 @@ var L = (function () {
     ["LA-OWN-SHP-HL", "LA", "OWN", "HL Sheep", "PCS", "N", "N", 10, "Y"], ["LA-OWN-GOT", "LA", "OWN", "Goat", "PCS", "N", "N", 20, "Y"],
     ["LA-OWN-CLF-SUP", "LA", "OWN", "Calf Supplier", "PCS", "N", "N", 30, "Y"], ["LA-OWN-CLF-OWN", "LA", "OWN", "Calf Own", "PCS", "N", "N", 40, "Y"],
     ["LA-OWN-BUL-SUP", "LA", "OWN", "Bull Supplier", "PCS", "N", "N", 50, "Y"], ["LA-OWN-BUL-OWN", "LA", "OWN", "Bull Own", "PCS", "N", "N", 60, "Y"],
-    ["LA-SRV-SHP-HL", "LA", "SRV", "HL Sheep", "PCS", "N", "N", 70, "Y"], ["LA-SRV-GOT", "LA", "SRV", "Goat", "PCS", "N", "N", 80, "Y"],
-    ["LA-SRV-CLF-SUP", "LA", "SRV", "Calf Supplier", "PCS", "N", "N", 90, "Y"], ["LA-SRV-CLF-OWN", "LA", "SRV", "Calf Own", "PCS", "N", "N", 100, "Y"],
-    ["LA-SRV-BUL-SUP", "LA", "SRV", "Bull Supplier", "PCS", "N", "N", 110, "Y"], ["LA-SRV-BUL-OWN", "LA", "SRV", "Bull Own", "PCS", "N", "N", 120, "Y"],
+    ["LA-SRV-SHP-HL", "LA", "SRV", "HL Sheep", "PCS", "N", "Y", 70, "Y"], ["LA-SRV-GOT", "LA", "SRV", "Goat", "PCS", "N", "Y", 80, "Y"],
+    ["LA-SRV-CLF-SUP", "LA", "SRV", "Calf Supplier", "PCS", "N", "Y", 90, "Y"], ["LA-SRV-CLF-OWN", "LA", "SRV", "Calf Own", "PCS", "N", "Y", 100, "Y"],
+    ["LA-SRV-BUL-SUP", "LA", "SRV", "Bull Supplier", "PCS", "N", "Y", 110, "Y"], ["LA-SRV-BUL-OWN", "LA", "SRV", "Bull Own", "PCS", "N", "Y", 120, "Y"],
     ["AM-OWN-SHG", "AM", "OWN", "Goat & Sheep", "PCS", "N", "N", 130, "Y"], ["AM-OWN-CAT", "AM", "OWN", "Cattle", "PCS", "N", "N", 140, "Y"],
     ["AM-SRV-SHG", "AM", "SRV", "Goat & Sheep", "PCS", "N", "N", 150, "Y"], ["AM-SRV-CAT", "AM", "SRV", "Cattle", "PCS", "N", "N", 160, "Y"],
     ["RS-OWN-VEAL", "RS", "OWN", "Veal", "PCS", "Y", "N", 170, "Y"], ["RS-OWN-MUTN", "RS", "OWN", "Mutton", "KG", "Y", "N", 180, "Y"],
@@ -38,6 +38,8 @@ var L = (function () {
     ["PR-EXP-LGOT", "PR", "EXP", "Local Goat", "KG", "N", "N", 410, "Y"], ["PR-EXP-SBFC", "PR", "EXP", "Special Beef FC", "PCS", "N", "N", 420, "Y"],
     ["PR-SRV-SHG", "PR", "SRV", "Goat & Sheep", "KG", "N", "Y", 430, "Y"], ["PR-SRV-CAT", "PR", "SRV", "Cattle", "KG", "N", "Y", 440, "Y"]
   ];
+  // Service livestock is counted per service customer (customer_required = Y), so each customer's animals can be
+  // followed through ante mortem and production.
   // the service customers already used by Luna (customer_master)
   var CUSTOMER_ROWS = [["CUS-001", "YABU"], ["CUS-002", "BILASOT"], ["CUS-003", "BBM"], ["CUS-004", "ART MERI"], ["CUS-005", "GETACHEW"],
     ["CUS-006", "BLACK PHOENIX"], ["CUS-007", "HABTAMU DEMBEL"], ["CUS-008", "AL HALAL"], ["CUS-009", "YASMIN JIBRIL"], ["CUS-010", "HOMESIDE"], ["CUS-011", "FUAD"]];
@@ -48,6 +50,11 @@ var L = (function () {
   var KINDS = { lv: "Livestock Availability", am: "Ante Mortem", order: "Reservation", prod: "Production", stock: "Dispatch & Stock" };
   var REASONS = ["Sick / fever", "Lame / injured", "Emaciated", "Pregnant", "Dead on arrival", "Other"];
   var GROUPS = [["SHG", "Goat & Sheep"], ["CAT", "Cattle"]];
+  // Carcass weight per head, kg (cold carcass, Ethiopian highland and lowland breeds): the usual range and the most
+  // that is physically possible. Used to check that kg reserved or produced can come from the heads that passed.
+  var YIELD = { SHG: { lo: 8, hi: 22, max: 35 }, CAT: { lo: 90, hi: 300, max: 450 } };
+  // which animals each product comes from
+  var PGROUP = { VEAL: "CAT", MUTN: "SHG", LGOT: "SHG", SBFC: "CAT", SRIB: "CAT", SAGB: "CAT", RIBS: "CAT", OSSO: "CAT", SHG: "SHG", CAT: "CAT" };
 
   var ITEM = {}, ITEMS = ITEM_ROWS.map(function (r) {
     var it = { c: r[0], st: r[1], sg: r[2], nm: r[3], u: r[4], ch: r[5] === "Y", cu: r[6] === "Y", so: r[7], on: r[8] === "Y" };
@@ -167,7 +174,33 @@ var L = (function () {
         if (g in av && ins[g] > av[g]) warn.push(sgShort(p[0]) + " " + grpName(p[1]) + ": " + ins[g] + " inspected but " + av[g] + " available.");
       });
     }
+    if (kind === "order" || kind === "prod") warn = warn.concat(kgCheck(kind, d, out, getDoc));
     return { d: d, rows: out, warn: warn, err: null };
+  }
+  // Kg reserved or produced cannot be more than the animals can give: Own and Export come from Luna's own heads that
+  // passed ante mortem (or are available, before ante mortem); Service from each customer's own animals.
+  function kgCheck(kind, d, rows, getDoc) {
+    var warn = [], pass = getDoc("am", d) ? amPassed(d, getDoc) : available(d, getDoc), la = getDoc("lv", addDays(d, -1)) || [];
+    var kg = {}, src = getDoc("am", d) ? "passed ante mortem" : "available";
+    rows.forEach(function (r) {
+      var it = ITEM[r.ic]; if (!it || it.u !== "KG") return;
+      var g = PGROUP[it.p], k = it.sg === "SRV" ? "SRV|" + r.cu + "|" + g : "OWN|" + g;
+      kg[k] = r1((kg[k] || 0) + r.q);
+    });
+    Object.keys(kg).forEach(function (k) {
+      var p = k.split("|"), g = p[p.length - 1], heads = null, who;
+      if (p[0] === "OWN") { heads = pass["OWN|" + g]; who = "Own and Export " + grpName(g).toLowerCase(); }
+      else {
+        var cnt = 0, any = false;
+        la.forEach(function (r) { var it = ITEM[r.ic]; if (it && it.sg === "SRV" && r.cu === p[1] && it.g === g) { cnt += r.q; any = true; } });
+        if (any) heads = cnt;
+        who = cuName(p[1]) + " " + grpName(g).toLowerCase();
+      }
+      if (heads === null || heads === undefined) return;
+      var most = heads * YIELD[g].max;
+      if (kg[k] > most) warn.push(who + ": " + n1(kg[k]) + " kg " + (kind === "order" ? "reserved" : "produced") + " is more than " + n(heads) + " heads " + (p[0] === "OWN" ? src : "in the lairage") + " can give (at most about " + n(most) + " kg). Check the kg or the heads.");
+    });
+    return warn;
   }
 
   // ---------------------------------------------------------------- the plan for a slaughter day
@@ -223,6 +256,13 @@ var L = (function () {
       if (x.rj) out.push(["a", who + " rejected: " + x.why.join("; ")]);
       if (ins !== null && x.av !== null && ins > x.av) out.push(["r", who + ": " + n(ins) + " inspected but only " + n(x.av) + " available"]);
       if (ins !== null && x.av !== null && ins < x.av) out.push(["a", who + ": " + n(x.av - ins) + " available but not inspected"]);
+    });
+    var cuHeads = {};
+    (p.la || []).forEach(function (r) { var it = ITEM[r.ic]; if (it && it.sg === "SRV" && r.cu) { var k = r.cu + "|" + it.g; cuHeads[k] = (cuHeads[k] || 0) + r.q; } });
+    p.items.forEach(function (x) {
+      if (x.sg !== "SRV" || !x.cu || x.u !== "KG") return;
+      var g = PGROUP[x.p], h = cuHeads[x.cu + "|" + g], kgv = Math.max(x.res || 0, x.act || 0);
+      if (h !== undefined && kgv > h * YIELD[g].max) out.push(["r", lineName(x) + ": " + n1(kgv) + " kg but only " + n(h) + " heads of " + cuName(x.cu) + " in the lairage"]);
     });
     p.items.forEach(function (x) {
       var who = lineName(x), u = x.u === "KG" ? " kg" : " pcs";
@@ -329,7 +369,7 @@ var L = (function () {
 
   return {
     ITEMS: ITEMS, ITEM: ITEM, ITEM_ROWS: ITEM_ROWS, CUSTOMER_ROWS: CUSTOMER_ROWS, CUSTOMERS: CUSTOMERS, STAGES: STAGES, SEGMENTS: SEGMENTS, CHANNELS: CHANNELS,
-    STAGE: STAGE, KINDS: KINDS, REASONS: REASONS, GROUPS: GROUPS, PRODUCTS: PRODUCTS, PROD: PROD, LOCAL: LOCAL, EXPORT: EXPORT, QUALITY: QUALITY,
+    STAGE: STAGE, KINDS: KINDS, YIELD: YIELD, PGROUP: PGROUP, REASONS: REASONS, GROUPS: GROUPS, PRODUCTS: PRODUCTS, PROD: PROD, LOCAL: LOCAL, EXPORT: EXPORT, QUALITY: QUALITY,
     items: items, segs: segs, cuName: cuName, chName: chName, sgName: sgName, sgShort: sgShort, grpName: grpName, label: label, remarks: remarks, key: key, isNew: isNew,
     isISO: isISO, inWin: inWin, addDays: addDays, diff: diff, dShort: dShort, dLong: dLong, dDM: dDM, range: range, win: win, defaultDate: defaultDate,
     n: n, n1: n1, nu: nu, r1: r1, txt: txt, clean: clean, heads: heads, available: available, amPassed: amPassed, plan: plan, hasAny: hasAny, lineName: lineName, alerts: alerts,
@@ -349,7 +389,7 @@ var L = (function () {
 //   Log      who saved, corrected or erased what, and when
 //   Settings the cut-off date and the dates the admin reopened
 // ============================================================================================================
-var VERSION = "18.1";
+var VERSION = "18.3";
 var TZ = "Africa/Addis_Ababa";
 var HEAD = {
   Users: ["Username", "Name", "Role", "PIN", "Forms", "Excel", "Admin", "Active", "Email"],
@@ -425,6 +465,9 @@ function masters_() {
   var fill = function (name, rows) {
     var sh = sheet_(name), v = sh.getDataRange().getValues(), have = {};
     for (var i = 1; i < v.length; i++) have[String(v[i][0])] = 1;
+    if (name === "item_master") rows.forEach(function (r) {          // keep the rules of each item up to date (the admin's active = N stays)
+      for (var j = 1; j < v.length; j++) if (String(v[j][0]) === r[0] && v[j].slice(1, 8).join("|") !== r.slice(1, 8).join("|")) sh.getRange(j + 1, 2, 1, 7).setValues([r.slice(1, 8)]);
+    });
     var add = rows.filter(function (r) { return !have[String(r[0])]; });
     if (add.length) sh.getRange(sh.getLastRow() + 1, 1, add.length, add[0].length).setValues(add);
     return sh;
@@ -618,6 +661,7 @@ function save_(q, user) {
         var x = day[sp];
         if (x.bal < 0 && x.u === "PCS") return { ok: false, error: x.nm + ": " + (-x.bal) + " pieces more dispatched than in stock (" + x.tot + ")." };
         if (x.bal < 0) c.warn.push(x.nm + ": the balance is below zero (" + x.bal + " kg). Check the weights.");
+        if (x.u === "KG" && x.shr > 0 && x.tot > 0 && x.shr > 0.05 * x.tot) c.warn.push(x.nm + ": shrinkage " + x.shr + " kg is " + (x.shr / x.tot * 100).toFixed(1) + "% of the stock. Chilled carcasses usually lose 1-3%. Check the weights.");
       }
     } else {
       var off = activeMaster_(), gone = c.rows.filter(function (r) { return off[r.ic] || (r.cu && off[r.cu]); })[0];
@@ -699,6 +743,12 @@ function ctx_(user, map) {
     Object.keys(map).filter(function (key) { return /^(order|prod)\|/.test(key) && key.split("|")[1] >= L.addDays(t, -30); }).sort(function (a, b) { return a.split("|")[1] < b.split("|")[1] ? 1 : -1; })
       .forEach(function (key) { map[key].rows.forEach(function (r) { if (r.cu && cus.indexOf(r.cu) < 0) cus.push(r.cu); }); });
     pre.cus = cus;
+  }
+  if (ks.indexOf("lv") >= 0) {           // service customers whose animals were in the lairage lately
+    var cl = [];
+    Object.keys(map).filter(function (key) { return key.indexOf("lv|") === 0 && key.split("|")[1] >= L.addDays(t, -14); }).sort().reverse()
+      .forEach(function (key) { map[key].rows.forEach(function (r) { if (r.cu && cl.indexOf(r.cu) < 0) cl.push(r.cu); }); });
+    pre.cusLv = cl;
   }
   if (ks.indexOf("stock") >= 0) {
     pre.stk = {};
